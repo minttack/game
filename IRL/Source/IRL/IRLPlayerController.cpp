@@ -9,7 +9,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Experience/IRLExperienceSubsystem.h"
 #include "IRL.h"
-#include "InputCoreTypes.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 void AIRLPlayerController::BeginPlay()
@@ -48,7 +47,6 @@ void AIRLPlayerController::BeginPlay()
 void AIRLPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	InputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIRLPlayerController::AdvanceIRLExperience);
 
 	// only add IMCs for local player controllers
 	if (IsLocalPlayerController())

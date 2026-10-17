@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Experience/IRLExperienceTypes.h"
 #include "GameFramework/Actor.h"
 #include "IRLExperienceBeacon.generated.h"
 
@@ -28,6 +29,14 @@ protected:
 	void HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
 		const FHitResult& SweepResult);
+
+	void AdvanceExperience();
+
+	UFUNCTION()
+	void HandleExperienceAdvanced(EIRLExperiencePhase Phase, const FText& BlueGuidance, const FText& BIEStatement);
+
+	UFUNCTION()
+	void HandleExperienceCompleted(FName ObjectiveId);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")

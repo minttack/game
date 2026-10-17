@@ -7,9 +7,12 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Experience/IRLExperienceSubsystem.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "InputCoreTypes.h"
 #include "UObject/ConstructorHelpers.h"
 
 AIRLExperienceBeacon::AIRLExperienceBeacon()
@@ -54,6 +57,15 @@ void AIRLExperienceBeacon::BeginPlay()
 {
 	Super::BeginPlay();
 	TriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AIRLExperienceBeacon::HandleBeginOverlap);
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UIRLExperienceSubsystem* Experience = GameInstance->GetSubsystem<UIRLExperienceSubsystem>())
+		{
+			Experience->OnExperienceAdvanced.AddUniqueDynamic(this, &AIRLExperienceBeacon::HandleExperienceAdvanced);
+			Experience->OnExperienceCompleted.AddUniqueDynamic(this, &AIRLExperienceBeacon::HandleExperienceCompleted);
+		}
+	}
 }
 
 void AIRLExperienceBeacon::Tick(float DeltaSeconds)
@@ -79,18 +91,61 @@ void AIRLExperienceBeacon::Tick(float DeltaSeconds)
 void AIRLExperienceBeacon::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bObjectiveStarted || !Cast<APawn>(OtherActor) || !GetGameInstance())
+	APawn* Pawn = Cast<APawn>(OtherActor);
+	if (bObjectiveStarted || !Pawn || !GetGameInstance())
 	{
 		return;
 	}
 
 	if (UIRLExperienceSubsystem* Experience = GetGameInstance()->GetSubsystem<UIRLExperienceSubsystem>())
 	{
+		if (APlayerController* PlayerController = Cast<APlayerController>(Pawn->GetController()))
+		{
+			EnableInput(PlayerController);
+			if (InputComponent)
+			{
+				InputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIRLExperienceBeacon::AdvanceExperience);
+			}
+		}
+
 		bObjectiveStarted = Experience->BeginDefaultObjective();
 		if (bObjectiveStarted)
 		{
-			InstructionText->SetText(FText::FromString(TEXT("SIGNAL RECEIVED\nPRESS E TO ADVANCE")));
 			TriggerSphere->SetGenerateOverlapEvents(false);
 		}
 	}
+}
+
+void AIRLExperienceBeacon::AdvanceExperience()
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UIRLExperienceSubsystem* Experience = GameInstance->GetSubsystem<UIRLExperienceSubsystem>())
+		{
+			Experience->AdvanceExperience();
+		}
+	}
+}
+
+void AIRLExperienceBeacon::HandleExperienceAdvanced(EIRLExperiencePhase Phase, const FText& BlueGuidance,
+	const FText& BIEStatement)
+{
+	const UEnum* PhaseEnum = StaticEnum<EIRLExperiencePhase>();
+	const FText PhaseName = PhaseEnum
+		? PhaseEnum->GetDisplayNameTextByValue(static_cast<int64>(Phase))
+		: FText::FromString(TEXT("Experience"));
+	const FText Prompt = Phase == EIRLExperiencePhase::Complete
+		? FText::FromString(TEXT("OBJECTIVE COMPLETE"))
+		: FText::FromString(TEXT("PRESS E FOR NEXT PHASE"));
+
+	InstructionText->SetText(FText::Format(
+		FText::FromString(TEXT("{0}\n{1}")),
+		PhaseName.ToUpper(),
+		Prompt));
+}
+
+void AIRLExperienceBeacon::HandleExperienceCompleted(FName ObjectiveId)
+{
+	SignalLight->SetLightColor(FLinearColor(0.18f, 1.0f, 0.52f));
+	InstructionText->SetText(FText::FromString(TEXT("FIRST SIGNAL\nOBJECTIVE COMPLETE")));
 }
