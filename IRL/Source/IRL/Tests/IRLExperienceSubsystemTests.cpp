@@ -37,6 +37,14 @@ bool FIRLExperienceLifecycleTest::RunTest(const FString& Parameters)
 	Experience->ResetExperience();
 	TestFalse(TEXT("Reset makes the experience inactive"), Experience->IsExperienceActive());
 	TestEqual(TEXT("Reset progress is zero"), Experience->GetProgress(), 0.0f);
+
+	TestTrue(TEXT("Motion Bloom begins"), Experience->BeginMotionBloomObjective());
+	TestEqual(TEXT("Motion Bloom id is stable"), Experience->GetCurrentObjectiveId(), FName(TEXT("MotionBloom")));
+	for (int32 Step = 0; Step < 5; ++Step)
+	{
+		TestTrue(FString::Printf(TEXT("Advance Motion Bloom step %d"), Step + 1), Experience->AdvanceExperience());
+	}
+	TestTrue(TEXT("Motion Bloom reaches completion"), Experience->IsExperienceComplete());
 	return true;
 }
 

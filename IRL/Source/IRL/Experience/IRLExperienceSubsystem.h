@@ -32,6 +32,9 @@ public:
 	bool BeginDefaultObjective();
 
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
+	bool BeginMotionBloomObjective();
+
+	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
 	bool BeginObjective(const FIRLObjectiveDefinition& Definition);
 
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
@@ -56,6 +59,7 @@ public:
 	FName GetCurrentObjectiveId() const { return CurrentObjective.ObjectiveId; }
 
 	static FIRLObjectiveDefinition BuildFirstSignalObjective();
+	static FIRLObjectiveDefinition BuildMotionBloomObjective();
 
 private:
 	void BroadcastCurrentStep();

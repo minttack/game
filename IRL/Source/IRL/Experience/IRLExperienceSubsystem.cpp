@@ -22,6 +22,11 @@ bool UIRLExperienceSubsystem::BeginDefaultObjective()
 	return BeginObjective(BuildFirstSignalObjective());
 }
 
+bool UIRLExperienceSubsystem::BeginMotionBloomObjective()
+{
+	return BeginObjective(BuildMotionBloomObjective());
+}
+
 bool UIRLExperienceSubsystem::BeginObjective(const FIRLObjectiveDefinition& Definition)
 {
 	if (Definition.ObjectiveId.IsNone() || Definition.Steps.IsEmpty())
@@ -133,6 +138,43 @@ FIRLObjectiveDefinition UIRLExperienceSubsystem::BuildFirstSignalObjective()
 			LOCTEXT("CompleteTitle", "Verify completion"),
 			LOCTEXT("CompleteBlue", "BLUE: Completion is an observed condition, not a feeling of being finished."),
 			LOCTEXT("CompleteBIE", "BIE: The signal stabilizes, the path opens, and the First Signal objective is complete."))
+	};
+
+	return Objective;
+}
+
+FIRLObjectiveDefinition UIRLExperienceSubsystem::BuildMotionBloomObjective()
+{
+	using namespace IRLExperience;
+
+	FIRLObjectiveDefinition Objective;
+	Objective.ObjectiveId = TEXT("MotionBloom");
+	Objective.Title = LOCTEXT("MotionBloomTitle", "Motion Bloom");
+	Objective.Steps = {
+		MakeStep(EIRLExperiencePhase::Objective,
+			LOCTEXT("MotionObjectiveTitle", "Find motion's rule"),
+			LOCTEXT("MotionObjectiveBlue", "BLUE: Ask what changes position, direction, rhythm, or relation."),
+			LOCTEXT("MotionObjectiveBIE", "BIE: Observe the orbiting bloom and identify what repeats and what varies.")),
+		MakeStep(EIRLExperiencePhase::Observe,
+			LOCTEXT("MotionObserveTitle", "Observe the wiggle"),
+			LOCTEXT("MotionObserveBlue", "BLUE: Measure the pattern before explaining its cause."),
+			LOCTEXT("MotionObserveBIE", "BIE: Each body circles, rises, falls, and returns; motion is change measured against relationship.")),
+		MakeStep(EIRLExperiencePhase::Bloom,
+			LOCTEXT("MotionBloomPhaseTitle", "Bloom possibilities"),
+			LOCTEXT("MotionBloomBlue", "BLUE: Keep force, stored energy, feedback, and living control open as candidates."),
+			LOCTEXT("MotionBloomBIE", "BIE: A wiggle can emerge from impact, recovery, oscillation, or an organism correcting itself.")),
+		MakeStep(EIRLExperiencePhase::Test,
+			LOCTEXT("MotionTestTitle", "Test the rhythm"),
+			LOCTEXT("MotionTestBlue", "BLUE: Change one condition and watch which feature follows."),
+			LOCTEXT("MotionTestBIE", "BIE: Faster cycling changes timing but preserves the orbit, separating speed from structure.")),
+		MakeStep(EIRLExperiencePhase::Resolve,
+			LOCTEXT("MotionResolveTitle", "Resolve the pattern"),
+			LOCTEXT("MotionResolveBlue", "BLUE: State the smallest rule supported by every observation."),
+			LOCTEXT("MotionResolveBIE", "BIE: Movement in life couples outside forces with inner feedback; the visible wiggle is their negotiation.")),
+		MakeStep(EIRLExperiencePhase::Complete,
+			LOCTEXT("MotionCompleteTitle", "Complete the motion model"),
+			LOCTEXT("MotionCompleteBlue", "BLUE: Keep the rule revisable when a new motion disagrees."),
+			LOCTEXT("MotionCompleteBIE", "BIE: Motion Bloom complete: impact begins change, constraints shape it, and feedback keeps living motion adaptive."))
 	};
 
 	return Objective;

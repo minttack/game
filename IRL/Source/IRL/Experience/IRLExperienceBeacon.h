@@ -51,6 +51,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
 	TObjectPtr<UTextRenderComponent> InstructionText;
 
+	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
+	TArray<TObjectPtr<UStaticMeshComponent>> MotionPetals;
+
 	UPROPERTY(EditAnywhere, Category = "IRL|Experience", meta = (ClampMin = "0.1"))
 	float PulseSpeed = 1.35f;
 
@@ -59,4 +62,6 @@ private:
 
 	float RunningTime = 0.0f;
 	bool bObjectiveStarted = false;
+	bool bMotionBloomReady = false;
+	bool bMotionBloomActive = false;
 };

@@ -37,6 +37,21 @@ AIRLExperienceBeacon::AIRLExperienceBeacon()
 		SignalMesh->SetStaticMesh(SphereMesh.Object);
 	}
 
+	for (int32 Index = 0; Index < 5; ++Index)
+	{
+		UStaticMeshComponent* Petal = CreateDefaultSubobject<UStaticMeshComponent>(
+			*FString::Printf(TEXT("MotionPetal%d"), Index));
+		Petal->SetupAttachment(TriggerSphere);
+		Petal->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Petal->SetRelativeScale3D(FVector(0.13f, 0.13f, 0.28f));
+		Petal->SetVisibility(false);
+		if (SphereMesh.Succeeded())
+		{
+			Petal->SetStaticMesh(SphereMesh.Object);
+		}
+		MotionPetals.Add(Petal);
+	}
+
 	SignalLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("SignalLight"));
 	SignalLight->SetupAttachment(SignalMesh);
 	SignalLight->SetLightColor(FLinearColor(0.08f, 0.42f, 1.0f));
@@ -77,6 +92,19 @@ void AIRLExperienceBeacon::Tick(float DeltaSeconds)
 	const float Scale = 0.55f * (1.0f + Wave * PulseAmplitude);
 	SignalMesh->SetRelativeScale3D(FVector(Scale));
 	SignalLight->SetIntensity(FMath::Lerp(6500.0f, 11000.0f, Wave));
+
+	if (bMotionBloomReady || bMotionBloomActive)
+	{
+		for (int32 Index = 0; Index < MotionPetals.Num(); ++Index)
+		{
+			const float Angle = RunningTime * (bMotionBloomActive ? 1.8f : 0.8f)
+				+ (UE_TWO_PI * static_cast<float>(Index) / MotionPetals.Num());
+			const float Radius = 115.0f + 18.0f * FMath::Sin(RunningTime * 1.4f + Index);
+			const float Height = 35.0f * FMath::Sin(Angle * 2.0f);
+			MotionPetals[Index]->SetRelativeLocation(FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, Height));
+			MotionPetals[Index]->SetRelativeRotation(FRotator(0.0f, FMath::RadiansToDegrees(Angle), 25.0f));
+		}
+	}
 
 	if (InstructionText && GetWorld() && GetWorld()->GetFirstPlayerController())
 	{
@@ -122,7 +150,15 @@ void AIRLExperienceBeacon::AdvanceExperience()
 	{
 		if (UIRLExperienceSubsystem* Experience = GameInstance->GetSubsystem<UIRLExperienceSubsystem>())
 		{
-			Experience->AdvanceExperience();
+			if (bMotionBloomReady)
+			{
+				bMotionBloomReady = false;
+				bMotionBloomActive = Experience->BeginMotionBloomObjective();
+			}
+			else
+			{
+				Experience->AdvanceExperience();
+			}
 		}
 	}
 }
@@ -146,6 +182,18 @@ void AIRLExperienceBeacon::HandleExperienceAdvanced(EIRLExperiencePhase Phase, c
 
 void AIRLExperienceBeacon::HandleExperienceCompleted(FName ObjectiveId)
 {
+	if (ObjectiveId == TEXT("FirstSignal"))
+	{
+		bMotionBloomReady = true;
+		for (UStaticMeshComponent* Petal : MotionPetals)
+		{
+			Petal->SetVisibility(true);
+		}
+		SignalLight->SetLightColor(FLinearColor(0.72f, 0.18f, 1.0f));
+		InstructionText->SetText(FText::FromString(TEXT("MOTION BLOOM AWAKENED\nPRESS E TO BEGIN")));
+		return;
+	}
+
 	SignalLight->SetLightColor(FLinearColor(0.18f, 1.0f, 0.52f));
-	InstructionText->SetText(FText::FromString(TEXT("FIRST SIGNAL\nOBJECTIVE COMPLETE")));
+	InstructionText->SetText(FText::FromString(TEXT("MOTION BLOOM\nOBJECTIVE COMPLETE")));
 }
