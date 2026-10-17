@@ -27,6 +27,11 @@ bool UIRLExperienceSubsystem::BeginMotionBloomObjective()
 	return BeginObjective(BuildMotionBloomObjective());
 }
 
+bool UIRLExperienceSubsystem::BeginResonanceGardenObjective()
+{
+	return BeginObjective(BuildResonanceGardenObjective());
+}
+
 bool UIRLExperienceSubsystem::BeginObjective(const FIRLObjectiveDefinition& Definition)
 {
 	if (Definition.ObjectiveId.IsNone() || Definition.Steps.IsEmpty())
@@ -177,6 +182,36 @@ FIRLObjectiveDefinition UIRLExperienceSubsystem::BuildMotionBloomObjective()
 			LOCTEXT("MotionCompleteBIE", "BIE: Motion Bloom complete: impact begins change, constraints shape it, and feedback keeps living motion adaptive."))
 	};
 
+	return Objective;
+}
+
+FIRLObjectiveDefinition UIRLExperienceSubsystem::BuildResonanceGardenObjective()
+{
+	using namespace IRLExperience;
+
+	FIRLObjectiveDefinition Objective;
+	Objective.ObjectiveId = TEXT("ResonanceGarden");
+	Objective.Title = LOCTEXT("ResonanceGardenTitle", "Resonance Garden");
+	Objective.Steps = {
+		MakeStep(EIRLExperiencePhase::Objective, LOCTEXT("ResObjectiveTitle", "Awaken resonance"),
+			LOCTEXT("ResObjectiveBlue", "BLUE: Look for relationships that amplify one another without losing their differences."),
+			LOCTEXT("ResObjectiveBIE", "BIE: Two streams of light share one path while remaining distinct.")),
+		MakeStep(EIRLExperiencePhase::Observe, LOCTEXT("ResObserveTitle", "Hear with the eyes"),
+			LOCTEXT("ResObserveBlue", "BLUE: Track timing, phase, and response—not brightness alone."),
+			LOCTEXT("ResObserveBIE", "BIE: The motes answer across the helix; each pulse becomes context for the next.")),
+		MakeStep(EIRLExperiencePhase::Bloom, LOCTEXT("ResBloomTitle", "Bloom the relation"),
+			LOCTEXT("ResBloomBlue", "BLUE: Explore harmony, interference, memory, and communication as live possibilities."),
+			LOCTEXT("ResBloomBIE", "BIE: The garden may be displaying how separate lives create a pattern no single life contains.")),
+		MakeStep(EIRLExperiencePhase::Test, LOCTEXT("ResTestTitle", "Disturb the harmony"),
+			LOCTEXT("ResTestBlue", "BLUE: A stable pattern should recover after a bounded disturbance."),
+			LOCTEXT("ResTestBIE", "BIE: The helix widens, loses alignment, then discovers its rhythm again.")),
+		MakeStep(EIRLExperiencePhase::Resolve, LOCTEXT("ResResolveTitle", "Name the magic"),
+			LOCTEXT("ResResolveBlue", "BLUE: Prefer an explanation that preserves both mechanism and wonder."),
+			LOCTEXT("ResResolveBIE", "BIE: The magic is emergence—simple responses becoming a living, shared form.")),
+		MakeStep(EIRLExperiencePhase::Complete, LOCTEXT("ResCompleteTitle", "Garden harmonized"),
+			LOCTEXT("ResCompleteBlue", "BLUE: Carry the pattern forward, but let the next encounter revise it."),
+			LOCTEXT("ResCompleteBIE", "BIE: Resonance Garden complete. Motion has become relationship, and relationship has become light."))
+	};
 	return Objective;
 }
 

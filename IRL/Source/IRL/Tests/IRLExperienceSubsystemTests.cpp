@@ -45,6 +45,14 @@ bool FIRLExperienceLifecycleTest::RunTest(const FString& Parameters)
 		TestTrue(FString::Printf(TEXT("Advance Motion Bloom step %d"), Step + 1), Experience->AdvanceExperience());
 	}
 	TestTrue(TEXT("Motion Bloom reaches completion"), Experience->IsExperienceComplete());
+
+	TestTrue(TEXT("Resonance Garden begins"), Experience->BeginResonanceGardenObjective());
+	TestEqual(TEXT("Resonance Garden id is stable"), Experience->GetCurrentObjectiveId(), FName(TEXT("ResonanceGarden")));
+	for (int32 Step = 0; Step < 5; ++Step)
+	{
+		TestTrue(FString::Printf(TEXT("Advance Resonance Garden step %d"), Step + 1), Experience->AdvanceExperience());
+	}
+	TestTrue(TEXT("Resonance Garden reaches completion"), Experience->IsExperienceComplete());
 	return true;
 }
 

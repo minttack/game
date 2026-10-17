@@ -35,6 +35,9 @@ public:
 	bool BeginMotionBloomObjective();
 
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
+	bool BeginResonanceGardenObjective();
+
+	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
 	bool BeginObjective(const FIRLObjectiveDefinition& Definition);
 
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
@@ -60,6 +63,7 @@ public:
 
 	static FIRLObjectiveDefinition BuildFirstSignalObjective();
 	static FIRLObjectiveDefinition BuildMotionBloomObjective();
+	static FIRLObjectiveDefinition BuildResonanceGardenObjective();
 
 private:
 	void BroadcastCurrentStep();

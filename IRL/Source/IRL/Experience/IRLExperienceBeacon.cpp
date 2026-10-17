@@ -52,6 +52,30 @@ AIRLExperienceBeacon::AIRLExperienceBeacon()
 		MotionPetals.Add(Petal);
 	}
 
+	for (int32 Index = 0; Index < 8; ++Index)
+	{
+		UStaticMeshComponent* Mote = CreateDefaultSubobject<UStaticMeshComponent>(
+			*FString::Printf(TEXT("MagicMote%d"), Index));
+		Mote->SetupAttachment(TriggerSphere);
+		Mote->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Mote->SetRelativeScale3D(FVector(0.09f));
+		Mote->SetVisibility(false);
+		if (SphereMesh.Succeeded())
+		{
+			Mote->SetStaticMesh(SphereMesh.Object);
+		}
+		MagicMotes.Add(Mote);
+
+		UPointLightComponent* MoteLight = CreateDefaultSubobject<UPointLightComponent>(
+			*FString::Printf(TEXT("MagicLight%d"), Index));
+		MoteLight->SetupAttachment(Mote);
+		MoteLight->SetIntensity(2600.0f);
+		MoteLight->SetAttenuationRadius(280.0f);
+		MoteLight->SetCastShadows(false);
+		MoteLight->SetVisibility(false);
+		MagicLights.Add(MoteLight);
+	}
+
 	SignalLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("SignalLight"));
 	SignalLight->SetupAttachment(SignalMesh);
 	SignalLight->SetLightColor(FLinearColor(0.08f, 0.42f, 1.0f));
@@ -106,6 +130,20 @@ void AIRLExperienceBeacon::Tick(float DeltaSeconds)
 		}
 	}
 
+	if (bResonanceReady || bResonanceActive)
+	{
+		const float PhaseEnergy = 1.0f + static_cast<float>(CurrentPhase) * 0.16f;
+		for (int32 Index = 0; Index < MagicMotes.Num(); ++Index)
+		{
+			const float Strand = Index % 2 == 0 ? 1.0f : -1.0f;
+			const float Angle = RunningTime * PhaseEnergy * Strand + Index * (UE_PI / 2.0f);
+			const float Radius = (145.0f + 25.0f * FMath::Sin(RunningTime * 0.7f)) * PhaseEnergy;
+			const float Height = -80.0f + Index * 24.0f + 30.0f * FMath::Sin(Angle * 0.5f);
+			MagicMotes[Index]->SetRelativeLocation(FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, Height));
+			MagicLights[Index]->SetIntensity(1800.0f + 1800.0f * (0.5f + 0.5f * FMath::Sin(Angle * 2.0f)));
+		}
+	}
+
 	if (InstructionText && GetWorld() && GetWorld()->GetFirstPlayerController())
 	{
 		const FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager
@@ -150,7 +188,12 @@ void AIRLExperienceBeacon::AdvanceExperience()
 	{
 		if (UIRLExperienceSubsystem* Experience = GameInstance->GetSubsystem<UIRLExperienceSubsystem>())
 		{
-			if (bMotionBloomReady)
+			if (bResonanceReady)
+			{
+				bResonanceReady = false;
+				bResonanceActive = Experience->BeginResonanceGardenObjective();
+			}
+			else if (bMotionBloomReady)
 			{
 				bMotionBloomReady = false;
 				bMotionBloomActive = Experience->BeginMotionBloomObjective();
@@ -166,6 +209,7 @@ void AIRLExperienceBeacon::AdvanceExperience()
 void AIRLExperienceBeacon::HandleExperienceAdvanced(EIRLExperiencePhase Phase, const FText& BlueGuidance,
 	const FText& BIEStatement)
 {
+	CurrentPhase = Phase;
 	const UEnum* PhaseEnum = StaticEnum<EIRLExperiencePhase>();
 	const FText PhaseName = PhaseEnum
 		? PhaseEnum->GetDisplayNameTextByValue(static_cast<int64>(Phase))
@@ -194,6 +238,22 @@ void AIRLExperienceBeacon::HandleExperienceCompleted(FName ObjectiveId)
 		return;
 	}
 
-	SignalLight->SetLightColor(FLinearColor(0.18f, 1.0f, 0.52f));
-	InstructionText->SetText(FText::FromString(TEXT("MOTION BLOOM\nOBJECTIVE COMPLETE")));
+	if (ObjectiveId == TEXT("MotionBloom"))
+	{
+		bMotionBloomActive = false;
+		bResonanceReady = true;
+		for (int32 Index = 0; Index < MagicMotes.Num(); ++Index)
+		{
+			MagicMotes[Index]->SetVisibility(true);
+			MagicLights[Index]->SetVisibility(true);
+			MagicLights[Index]->SetLightColor(FLinearColor::MakeFromHSV8(static_cast<uint8>(Index * 31), 220, 255));
+		}
+		SignalLight->SetLightColor(FLinearColor(1.0f, 0.16f, 0.72f));
+		InstructionText->SetText(FText::FromString(TEXT("RESONANCE GARDEN OPEN\nPRESS E TO ENTER")));
+		return;
+	}
+
+	bResonanceActive = false;
+	SignalLight->SetLightColor(FLinearColor(1.0f, 0.78f, 0.18f));
+	InstructionText->SetText(FText::FromString(TEXT("RESONANCE GARDEN\nHARMONIZED")));
 }

@@ -54,6 +54,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
 	TArray<TObjectPtr<UStaticMeshComponent>> MotionPetals;
 
+	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
+	TArray<TObjectPtr<UStaticMeshComponent>> MagicMotes;
+
+	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
+	TArray<TObjectPtr<UPointLightComponent>> MagicLights;
+
 	UPROPERTY(EditAnywhere, Category = "IRL|Experience", meta = (ClampMin = "0.1"))
 	float PulseSpeed = 1.35f;
 
@@ -64,4 +70,7 @@ private:
 	bool bObjectiveStarted = false;
 	bool bMotionBloomReady = false;
 	bool bMotionBloomActive = false;
+	bool bResonanceReady = false;
+	bool bResonanceActive = false;
+	EIRLExperiencePhase CurrentPhase = EIRLExperiencePhase::Objective;
 };
