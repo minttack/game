@@ -32,6 +32,7 @@ AIRLExperienceBeacon::AIRLExperienceBeacon()
 	SignalMesh->SetRelativeScale3D(FVector(0.55f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeMesh(TEXT("/Engine/BasicShapes/Cone.Cone"));
 	if (SphereMesh.Succeeded())
 	{
 		SignalMesh->SetStaticMesh(SphereMesh.Object);
@@ -58,7 +59,7 @@ AIRLExperienceBeacon::AIRLExperienceBeacon()
 			*FString::Printf(TEXT("MagicMote%d"), Index));
 		Mote->SetupAttachment(TriggerSphere);
 		Mote->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Mote->SetRelativeScale3D(FVector(0.09f));
+		Mote->SetRelativeScale3D(FVector(0.28f));
 		Mote->SetVisibility(false);
 		if (SphereMesh.Succeeded())
 		{
@@ -69,11 +70,26 @@ AIRLExperienceBeacon::AIRLExperienceBeacon()
 		UPointLightComponent* MoteLight = CreateDefaultSubobject<UPointLightComponent>(
 			*FString::Printf(TEXT("MagicLight%d"), Index));
 		MoteLight->SetupAttachment(Mote);
-		MoteLight->SetIntensity(2600.0f);
-		MoteLight->SetAttenuationRadius(280.0f);
+		MoteLight->SetIntensity(6000.0f);
+		MoteLight->SetAttenuationRadius(520.0f);
 		MoteLight->SetCastShadows(false);
 		MoteLight->SetVisibility(false);
 		MagicLights.Add(MoteLight);
+	}
+
+	for (int32 Index = 0; Index < 12; ++Index)
+	{
+		UStaticMeshComponent* Shard = CreateDefaultSubobject<UStaticMeshComponent>(
+			*FString::Printf(TEXT("PortalShard%d"), Index));
+		Shard->SetupAttachment(TriggerSphere);
+		Shard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Shard->SetRelativeScale3D(FVector(0.18f, 0.18f, 0.72f));
+		Shard->SetVisibility(false);
+		if (ConeMesh.Succeeded())
+		{
+			Shard->SetStaticMesh(ConeMesh.Object);
+		}
+		PortalShards.Add(Shard);
 	}
 
 	SignalLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("SignalLight"));
@@ -137,10 +153,27 @@ void AIRLExperienceBeacon::Tick(float DeltaSeconds)
 		{
 			const float Strand = Index % 2 == 0 ? 1.0f : -1.0f;
 			const float Angle = RunningTime * PhaseEnergy * Strand + Index * (UE_PI / 2.0f);
-			const float Radius = (145.0f + 25.0f * FMath::Sin(RunningTime * 0.7f)) * PhaseEnergy;
-			const float Height = -80.0f + Index * 24.0f + 30.0f * FMath::Sin(Angle * 0.5f);
+			const float Radius = (205.0f + 32.0f * FMath::Sin(RunningTime * 0.7f)) * PhaseEnergy;
+			const float Height = -45.0f + Index * 48.0f + 42.0f * FMath::Sin(Angle * 0.5f);
+			const float MoteScale = 0.24f + 0.10f * (0.5f + 0.5f * FMath::Sin(Angle * 2.0f));
 			MagicMotes[Index]->SetRelativeLocation(FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, Height));
-			MagicLights[Index]->SetIntensity(1800.0f + 1800.0f * (0.5f + 0.5f * FMath::Sin(Angle * 2.0f)));
+			MagicMotes[Index]->SetRelativeScale3D(FVector(MoteScale));
+			MagicLights[Index]->SetIntensity(4200.0f + 4800.0f * (0.5f + 0.5f * FMath::Sin(Angle * 2.0f)));
+		}
+
+		for (int32 Index = 0; Index < PortalShards.Num(); ++Index)
+		{
+			const float CrownAngle = UE_TWO_PI * static_cast<float>(Index) / PortalShards.Num()
+				+ RunningTime * 0.22f * PhaseEnergy;
+			const float CrownRadius = 265.0f + 30.0f * FMath::Sin(RunningTime + Index * 0.6f);
+			PortalShards[Index]->SetRelativeLocation(FVector(
+				20.0f * FMath::Sin(CrownAngle * 3.0f),
+				FMath::Cos(CrownAngle) * CrownRadius,
+				260.0f + FMath::Sin(CrownAngle) * CrownRadius));
+			PortalShards[Index]->SetRelativeRotation(FRotator(
+				FMath::RadiansToDegrees(CrownAngle),
+				RunningTime * 35.0f,
+				90.0f));
 		}
 	}
 
@@ -247,6 +280,10 @@ void AIRLExperienceBeacon::HandleExperienceCompleted(FName ObjectiveId)
 			MagicMotes[Index]->SetVisibility(true);
 			MagicLights[Index]->SetVisibility(true);
 			MagicLights[Index]->SetLightColor(FLinearColor::MakeFromHSV8(static_cast<uint8>(Index * 31), 220, 255));
+		}
+		for (UStaticMeshComponent* Shard : PortalShards)
+		{
+			Shard->SetVisibility(true);
 		}
 		SignalLight->SetLightColor(FLinearColor(1.0f, 0.16f, 0.72f));
 		InstructionText->SetText(FText::FromString(TEXT("RESONANCE GARDEN OPEN\nPRESS E TO ENTER")));

@@ -60,6 +60,10 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
 	TArray<TObjectPtr<UPointLightComponent>> MagicLights;
 
+	/** Physical crown pieces that give the garden a readable portal silhouette. */
+	UPROPERTY(VisibleAnywhere, Category = "IRL|Experience")
+	TArray<TObjectPtr<UStaticMeshComponent>> PortalShards;
+
 	UPROPERTY(EditAnywhere, Category = "IRL|Experience", meta = (ClampMin = "0.1"))
 	float PulseSpeed = 1.35f;
 

@@ -9,7 +9,7 @@ The First Signal is IRL's first playable vertical slice. It adds a luminous sign
 3. Press **E** to move through Objective, Observe, Bloom, Test, Resolve, and Complete.
 4. Read Blue's method guidance and BIE's bounded interpretation in the on-screen client messages.
 5. Complete First Signal to awaken **Motion Bloom**, then press **E** to investigate motion through orbit, oscillation, impact, constraint, and feedback.
-6. Complete Motion Bloom to open the **Resonance Garden**, a colored double-helix constellation whose motion evolves with every reasoning phase.
+6. Complete Motion Bloom to open the **Resonance Garden**, a towering double-helix constellation surrounded by a rotating crown of physical portal shards. Its silhouette, scale, rhythm, and illumination evolve with every reasoning phase.
 
 Blue guides *how to reason*. BIE states *what the current evidence supports*. Neither silently chooses for the player.
 
