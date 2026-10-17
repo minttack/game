@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Experience/IRLExperienceTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "IRLPlayerController.generated.h"
 
@@ -19,6 +20,15 @@ class AIRLPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 protected:
+	/** Advances the active BIE experience one evidence step. */
+	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
+	void AdvanceIRLExperience();
+
+	UFUNCTION()
+	void HandleExperienceAdvanced(EIRLExperiencePhase Phase, const FText& BlueGuidance, const FText& BIEStatement);
+
+	UFUNCTION()
+	void HandleExperienceCompleted(FName ObjectiveId);
 
 	/** Input Mapping Contexts */
 	UPROPERTY(EditAnywhere, Category ="Input|Input Mappings")
