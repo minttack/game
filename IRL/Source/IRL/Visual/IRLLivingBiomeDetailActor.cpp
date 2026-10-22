@@ -55,9 +55,14 @@ void AIRLLivingBiomeDetailActor::BuildPlacementCache()
     FRandomStream GroundRandom(Seed);
     FRandomStream StoneRandom(Seed ^ 0x1735);
     FRandomStream LitterRandom(Seed ^ 0x5e21);
-    CachePositions(CachedGroundCover,460,GroundRandom,0.60f,MinimumWalkableNormalZ);
-    CachePositions(CachedStone,75,StoneRandom,0.25f,0.45f);
-    CachePositions(CachedLitter,190,LitterRandom,0.25f,MinimumWalkableNormalZ);
+    // Only trace terrain for artwork that is actually assigned. An empty
+    // detail channel must not spend up to 190 unnecessary collision queries.
+    if (GroundCoverMesh)
+        CachePositions(CachedGroundCover,460,GroundRandom,0.60f,MinimumWalkableNormalZ);
+    if (StoneMesh)
+        CachePositions(CachedStone,75,StoneRandom,0.25f,0.45f);
+    if (LeafLitterMesh)
+        CachePositions(CachedLitter,190,LitterRandom,0.25f,MinimumWalkableNormalZ);
     bPlacementCacheBuilt = true;
 }
 

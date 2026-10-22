@@ -78,4 +78,18 @@ for name in ['ForestSoil','Granite','LeafGreen']:
     editor.save_loaded_asset(material)
     unreal.log(f'IRL: created material {asset_path}')
 
-unreal.log('IRL assets imported. Assign to biome actor in existing IRL scene; original map remains unchanged.')
+# The opt-in IRL visual stage traces this exact terrain mesh for foliage.
+# A single, static 8192-triangle patch is acceptable for this staging test;
+# do not apply complex-as-simple to high-detail mobile environments broadly.
+terrain_mesh = unreal.load_asset(f'{DEST}/SM_IRL_TerrainPatch')
+if terrain_mesh is None:
+    raise RuntimeError('Source terrain mesh did not import')
+body_setup = terrain_mesh.get_editor_property('body_setup')
+if body_setup is None:
+    raise RuntimeError('Terrain mesh has no collision body setup')
+body_setup.set_editor_property('collision_trace_flag',
+                               unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+editor.save_loaded_asset(terrain_mesh)
+unreal.log('IRL: stage terrain static surface collision configured for biome traces')
+
+unreal.log('IRL assets imported. Existing game level unchanged; use assemble_irl_stage.py to place opt-in area.')
