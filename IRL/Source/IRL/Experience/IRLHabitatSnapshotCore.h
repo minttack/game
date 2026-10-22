@@ -114,3 +114,4 @@ inline bool IsNewer(std::uint32_t LastSequence, const Frame& Incoming)
 {
     return Validate(Incoming) && Incoming.Sequence > LastSequence;
 }
+}
