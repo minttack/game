@@ -38,7 +38,7 @@ jobs:
           import json, hashlib
           folder=Path('IRL/Tools/Visual/Generated')
           m=json.loads((folder/'IRL_Original_PBR_Manifest.json').read_text())
-          assert len(m['sha256']) == 17
+          assert len(m['sha256']) == 16
           for name, wanted in m['sha256'].items():
               assert hashlib.sha256((folder/name).read_bytes()).hexdigest() == wanted, name
           print('PASS IRL original PBR manifest validation:',len(m['sha256']),'assets')
