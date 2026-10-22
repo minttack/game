@@ -190,11 +190,20 @@ private:
         std::uint64_t Total = 0;
         for (const auto& E : Evidence) { Total += E.ObservedTrials; }
 
-        // Sample each action at least once in every newly observed context.
+        // Sample each action in new contexts, but let inherited tentative
+        // beliefs influence the ORDER of exploration, not the trial counts.
+        std::size_t FirstUntried = ActionCount;
+        double BestInheritedPrior = -std::numeric_limits<double>::infinity();
         for (std::size_t A = 0; A < ActionCount; ++A)
         {
-            if (Evidence[A].ObservedTrials == 0) { return A; }
+            if (Evidence[A].ObservedTrials == 0 &&
+                Evidence[A].InheritedPrior > BestInheritedPrior)
+            {
+                FirstUntried = A;
+                BestInheritedPrior = Evidence[A].InheritedPrior;
+            }
         }
+        if (FirstUntried != ActionCount) { return FirstUntried; }
 
         std::size_t Best = 0;
         double BestScore = -std::numeric_limits<double>::infinity();
