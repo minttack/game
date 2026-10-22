@@ -2,6 +2,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Visual/IRLLivingBiomeDetailActor.h"
 
 UIRLAdaptiveMobileFidelityComponent::UIRLAdaptiveMobileFidelityComponent()
 {
@@ -58,6 +60,14 @@ void UIRLAdaptiveMobileFidelityComponent::ApplyTier(IRLVisual::Tier Tier)
     Settings->SetEffectsQuality(Q);
     Settings->SetFoliageQuality(Q);
     Settings->ApplyNonResolutionSettings();
+    if (UWorld* World = GetWorld())
+    {
+        // Decorative instances are strictly local; neither player changes authoritative life.
+        for (TActorIterator<AIRLLivingBiomeDetailActor> It(World); It; ++It)
+        {
+            It->ApplyVisualTier(Q);
+        }
+    }
 #else
     (void)Tier;
 #endif
