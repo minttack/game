@@ -59,8 +59,15 @@ protected:
 private:
     int32 LastTier = INDEX_NONE;
     int32 LastInstanceCount = 0;
+    bool bPlacementCacheBuilt = false;
+    // Generated once; changing mobile tier does not re-trace the entire scene.
+    TArray<FTransform> CachedGroundCover;
+    TArray<FTransform> CachedStone;
+    TArray<FTransform> CachedLitter;
+    void BuildPlacementCache();
     void Rebuild();
-    void Populate(UHierarchicalInstancedStaticMeshComponent* Instances,
-        int32 Count, FRandomStream& Random, float BaseScale,
-        float MaximumSlopeZ, float CullDistanceCm);
+    void CachePositions(TArray<FTransform>& Out, int32 MaxCount,
+        FRandomStream& Random, float BaseScale, float MinimumNormalZ);
+    void PopulateFromCache(UHierarchicalInstancedStaticMeshComponent* Instances,
+        const TArray<FTransform>& Cached, int32 Count, float CullDistanceCm);
 };
