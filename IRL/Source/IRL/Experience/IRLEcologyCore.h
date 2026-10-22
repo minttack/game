@@ -54,6 +54,7 @@ public:
     const Creature* Find(std::uint64_t Id)const{for(const auto &C:Creatures)if(C.Id==Id)return &C;return nullptr;}
     const std::vector<Creature>& Residents()const{return Creatures;}
     std::uint64_t WorldTicks()const{return TickCount;}
+    std::uint64_t FoodConsumed() const { return TotalFoodEaten; }
     void Regrow(){
         ++TickCount;
         for(auto &T:Tiles)if(T.RegrowthTicks>0 && TickCount%static_cast<std::uint64_t>(T.RegrowthTicks)==0 && T.Food<T.FoodCapacity)++T.Food;
@@ -91,7 +92,7 @@ public:
         int Cost=2; // living incurs metabolism whether or not it makes a good choice
         if(Decision==IRLLife::Action::Explore)Cost+=2;
         if(Decision==IRLLife::Action::Forage){
-            if(Here.Food>0){--Here.Food;Result.DidConsumeFood=true;Cost-=14;}
+            if(Here.Food>0){--Here.Food;++TotalFoodEaten;Result.DidConsumeFood=true;Cost-=14;}
             else Cost+=3;
         }
         if(Decision==IRLLife::Action::Shelter)Cost+=1;
@@ -111,7 +112,7 @@ public:
     void SetMaxActive(std::size_t Limit){MaxActiveCreatures=Limit;}
 private:
     int W=0,H=0;std::vector<Tile> Tiles;std::vector<Creature> Creatures;
-    std::mt19937_64 RandomEngine;std::uint64_t NextId=1,TickCount=0;
+    std::mt19937_64 RandomEngine;std::uint64_t NextId=1,TickCount=0,TotalFoodEaten=0;
     std::size_t MaxActiveCreatures=1000;
     bool Inside(int X,int Y) const{return X>=0&&Y>=0&&X<W&&Y<H&&Valid();}
     std::size_t Index(int X,int Y) const{return static_cast<std::size_t>(Y)*static_cast<std::size_t>(W)+static_cast<std::size_t>(X);}
