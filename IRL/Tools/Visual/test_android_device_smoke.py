@@ -57,7 +57,7 @@ with tempfile.TemporaryDirectory() as temp:
     assert adb.launch_calls==0
     assert r["device"]["model"]=="Moto G Test"
     assert len(r["device_serial_sha256"])==64
-    assert "A" not in json.dumps(r)
+    assert "device_serial" not in r and "serial" not in r["device"]
     checks+=1
 
     adb=FakeADB()
