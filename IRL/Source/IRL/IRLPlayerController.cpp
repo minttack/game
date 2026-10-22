@@ -10,6 +10,7 @@
 #include "Experience/IRLExperienceSubsystem.h"
 #include "IRL.h"
 #include "Visual/IRLAdaptiveMobileFidelityComponent.h"
+#include "Mobile/IRLMobileTouchHUD.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 AIRLPlayerController::AIRLPlayerController()
@@ -30,23 +31,26 @@ void AIRLPlayerController::BeginPlay()
 		}
 	}
 
-	// only spawn touch controls on local player controllers
+	// Android-first: Unreal's two native virtual joysticks handle moving and
+	// looking; our UMG overlay adds Jump and the BIE experience action.
+	// If a creator-supplied Blueprint exists, honor it. Otherwise a compiled
+	// widget provides a functional baseline with NO binary UMG asset required.
 	if (IsLocalPlayerController() && ShouldUseTouchControls())
 	{
-		// spawn the mobile controls widget
-		MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
-
+		TSubclassOf<UUserWidget> TouchClass=MobileControlsWidgetClass;
+		if (!TouchClass)
+		{
+			TouchClass=UIRLMobileTouchHUD::StaticClass();
+		}
+		MobileControlsWidget = CreateWidget<UUserWidget>(this, TouchClass);
 		if (MobileControlsWidget)
 		{
-			// add the controls to the player screen
-			MobileControlsWidget->AddToPlayerScreen(0);
-
-		} else {
-
-			UE_LOG(LogIRL, Error, TEXT("Could not spawn mobile controls widget."));
-
+			MobileControlsWidget->AddToPlayerScreen(100);
 		}
-
+		else
+		{
+			UE_LOG(LogIRL, Error, TEXT("IRL touch HUD failed: phone action buttons unavailable."));
+		}
 	}
 }
 
