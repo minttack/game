@@ -4,7 +4,7 @@ import configparser
 import json
 import re
 
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[1]
 project=json.loads((ROOT/"IRL.uproject").read_text(encoding="utf-8"))
 assert project["EngineAssociation"]=="5.8"
 assert any(p["Name"]=="IRL" for p in project["Modules"])
