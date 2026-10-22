@@ -49,17 +49,24 @@ class Mesh:
         return self.body
 
 saves=[]
+def save_and_confirm(mesh):
+    saves.append(mesh)
+    return True
 mesh=Mesh(Body())
 target=ORIGINAL_ASSET_PATH+"/SM_IRL_TerrainPatch"
-assert ensure_imported_ground_collision(Unreal,mesh,target,saves.append)
+assert ensure_imported_ground_collision(Unreal,mesh,target,save_and_confirm)
 assert saves==[mesh]
 assert mesh.body.flag==Flag.CTF_USE_COMPLEX_AS_SIMPLE
-assert ensure_imported_ground_collision(Unreal,mesh,target,saves.append)
+assert ensure_imported_ground_collision(Unreal,mesh,target,save_and_confirm)
 assert saves==[mesh], "Existing valid collision should not be re-saved"
-try:ensure_imported_ground_collision(Unreal,mesh,"/Game/Other/Unrelated",saves.append)
+failed=Mesh(Body())
+try:ensure_imported_ground_collision(Unreal,failed,target,lambda mesh: False)
+except RuntimeError as exc:assert 'failed to save' in str(exc)
+else:raise AssertionError('Unsaved physics configuration accepted')
+try:ensure_imported_ground_collision(Unreal,mesh,"/Game/Other/Unrelated",save_and_confirm)
 except RuntimeError as exc:assert "outside IRL" in str(exc)
 else:raise AssertionError("Unrelated asset was accepted")
-try:ensure_imported_ground_collision(Unreal,Mesh(None),target,saves.append)
+try:ensure_imported_ground_collision(Unreal,Mesh(None),target,save_and_confirm)
 except RuntimeError as exc:assert "no BodySetup" in str(exc)
 else:raise AssertionError("Missing collision body accepted")
 class Component:
