@@ -113,6 +113,13 @@ def make(unreal):
     if not any(a.get_class() == unreal.SkyAtmosphere.static_class() for a in existing):
         _spawn(unreal, editor_actors, unreal.SkyAtmosphere,
             ObjectPlacement("lighting", "IRL_VisualAtmosphere", (0, 0, 0)))
+    # Set a useful editing view toward the original IRL forest test patch.
+    # Editor camera position is visual convenience, not an in-game camera.
+    if hasattr(unreal, "UnrealEditorSubsystem"):
+        viewport = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+        viewport.set_level_viewport_camera_info(
+            unreal.Vector(14800, -4600, 2500),
+            unreal.Rotator(pitch=-15.0, yaw=36.0, roll=0.0))
     if not level_editor.save_current_level():
         raise RuntimeError("New IRL visual-validation map could not be saved")
     unreal.log(f"IRL visual level saved: {NEW_MAP}, {len(plan)} planned placements")
