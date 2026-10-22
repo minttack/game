@@ -29,6 +29,8 @@ jobs:
           python IRL/Tools/Visual/test_generated_assets.py
           python IRL/Tools/Visual/test_mobile_capture.py
           python IRL/Tools/Visual/test_forest_collision_gate.py
+          python IRL/Tools/Visual/test_forest_world_evidence.py
+          python IRL/Tools/Visual/test_probe_unreal_forest_mock.py
           python IRL/Tools/Visual/test_scene_plan.py
           python IRL/Tools/Visual/test_editor_scene_builder.py
       - name: Generate a reproducible original starter asset pack
