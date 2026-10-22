@@ -26,7 +26,7 @@ public:
     int32 ObservedExperienceCycles() const;
 
     UFUNCTION(BlueprintPure, Category="IRL|BIE Habitat")
-    int32 TotalFoodConsumed() const { return FoodConsumed; }
+    int32 TotalFoodConsumed() const;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="IRL|BIE Habitat")
@@ -58,6 +58,5 @@ protected:
 
 private:
     TUniquePtr<IRLEcology::Habitat> Runtime;
-    int32 FoodConsumed = 0;
     void RefreshVisuals();
 };
