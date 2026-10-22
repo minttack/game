@@ -58,6 +58,8 @@ for name in ['ForestSoil','Granite','LeafGreen']:
         material=unreal.AssetToolsHelpers.get_asset_tools().create_asset(
             f'M_IRL_{name}', DEST, unreal.Material, unreal.MaterialFactoryNew())
     assert material
+    if name == 'LeafGreen':
+        material.set_editor_property('two_sided', True)  # thin foliage blades
     unreal.MaterialEditingLibrary.delete_all_material_expressions(material)
     for kind,property_id,output in [
         ('BaseColor',unreal.MaterialProperty.MP_BASE_COLOR,'RGB'),
