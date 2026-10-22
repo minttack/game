@@ -69,7 +69,8 @@ def ensure_imported_ground_collision(unreal, mesh, mesh_asset_path, save_asset):
         raise RuntimeError("Imported terrain has no BodySetup; collision must be rebuilt in Unreal")
     if body.get_editor_property("collision_trace_flag") != desired:
         body.set_editor_property("collision_trace_flag", desired)
-        save_asset(mesh)
+        if save_asset(mesh) is not True:
+            raise RuntimeError('Unreal failed to save configured IRL ground collision')
     if body.get_editor_property("collision_trace_flag") != desired:
         raise RuntimeError("Terrain collision flag did not survive readback")
     return True
