@@ -47,6 +47,13 @@ struct FIRLObjectiveDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IRL|Experience")
 	FText Title;
 
+	/** For new research objectives, block the Test -> Resolve transition until
+	 * a predicted result has a source-reported outcome. This is not independent
+	 * verification of the physical event. Existing tutorials remain ungated.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IRL|Experience")
+	bool bRequireSourceReportedOutcomeAtTest = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IRL|Experience")
 	TArray<FIRLExperienceStep> Steps;
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Experience/IRLExperienceTypes.h"
+#include "Experience/IRLExperienceEvidenceCore.h"
 #include "IRLExperienceSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FIRLExperienceAdvanced, EIRLExperiencePhase, Phase, const FText&, BlueGuidance, const FText&, BIEStatement);
@@ -43,6 +44,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
 	bool AdvanceExperience();
 
+	/** Lock in a testable prediction BEFORE a result is available.
+	 * SourceTag identifies who is reporting, not proof the report is correct.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "IRL|Experience|Evidence")
+	bool StartEvidencePrediction(FName SourceTag, float PredictedValue, int32& OutTrialId);
+
+	/** Record an actual result as reported by a game-world event. Do not use
+	 * this with invented values or pre-written narration.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "IRL|Experience|Evidence")
+	bool ReportEvidenceOutcome(FName SourceTag, int32 TrialId, float ObservedValue);
+
+	UFUNCTION(BlueprintPure, Category = "IRL|Experience|Evidence")
+	int32 GetSourceReportedOutcomeCount() const;
+
+	UFUNCTION(BlueprintPure, Category = "IRL|Experience|Evidence")
+	float GetReportedPredictionMSE() const;
+
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
 	void ResetExperience();
 
@@ -76,4 +95,8 @@ private:
 
 	UPROPERTY(Transient)
 	bool bExperienceActive = false;
+
+	// Temporary in-memory reported trial log. A persistent, server-authoritative
+	// evidence journal and validated world-event listeners are future work.
+	IRLEvidence::Ledger EvidenceLedger;
 };

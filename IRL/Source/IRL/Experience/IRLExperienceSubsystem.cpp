@@ -39,6 +39,22 @@ bool UIRLExperienceSubsystem::BeginObjective(const FIRLObjectiveDefinition& Defi
 		return false;
 	}
 
+	if (Definition.bRequireSourceReportedOutcomeAtTest)
+	{
+		bool bHasTestPhase = false;
+		for (const FIRLExperienceStep& Step : Definition.Steps)
+		{
+			bHasTestPhase |= Step.Phase == EIRLExperiencePhase::Test;
+		}
+		if (!bHasTestPhase)
+		{
+			return false;
+		}
+	}
+
+	// Never let another objective inherit evidence merely because the reporter
+	// reused a source tag. The native ledger keeps non-replayable trial IDs.
+	EvidenceLedger.ResetObjective();
 	CurrentObjective = Definition;
 	CurrentStepIndex = 0;
 	bExperienceActive = true;
@@ -49,6 +65,15 @@ bool UIRLExperienceSubsystem::BeginObjective(const FIRLObjectiveDefinition& Defi
 bool UIRLExperienceSubsystem::AdvanceExperience()
 {
 	if (!bExperienceActive || !CurrentObjective.Steps.IsValidIndex(CurrentStepIndex) || IsExperienceComplete())
+	{
+		return false;
+	}
+
+	// The existing First Signal, Motion Bloom and Resonance Garden are guided
+	// tutorials. Only explicitly marked research objectives require evidence.
+	if (CurrentObjective.bRequireSourceReportedOutcomeAtTest
+		&& CurrentObjective.Steps[CurrentStepIndex].Phase == EIRLExperiencePhase::Test
+		&& EvidenceLedger.ReportedCount() == 0)
 	{
 		return false;
 	}
@@ -64,8 +89,48 @@ bool UIRLExperienceSubsystem::AdvanceExperience()
 	return true;
 }
 
+bool UIRLExperienceSubsystem::StartEvidencePrediction(
+	FName SourceTag, float PredictedValue, int32& OutTrialId)
+{
+	OutTrialId = 0;
+	if (!bExperienceActive || IsExperienceComplete() || SourceTag.IsNone()
+		|| !FMath::IsFinite(PredictedValue))
+	{
+		return false;
+	}
+
+	uint32 TrialId = 0;
+	if (!EvidenceLedger.Predict(static_cast<double>(PredictedValue),
+		GetTypeHash(SourceTag), TrialId) || TrialId > static_cast<uint32>(MAX_int32))
+	{
+		return false;
+	}
+	OutTrialId = static_cast<int32>(TrialId);
+	return true;
+}
+
+bool UIRLExperienceSubsystem::ReportEvidenceOutcome(
+	FName SourceTag, int32 TrialId, float ObservedValue)
+{
+	return bExperienceActive && !SourceTag.IsNone() && TrialId > 0
+		&& FMath::IsFinite(ObservedValue)
+		&& EvidenceLedger.ReportOutcome(static_cast<uint32>(TrialId),
+			GetTypeHash(SourceTag), static_cast<double>(ObservedValue));
+}
+
+int32 UIRLExperienceSubsystem::GetSourceReportedOutcomeCount() const
+{
+	return static_cast<int32>(EvidenceLedger.ReportedCount());
+}
+
+float UIRLExperienceSubsystem::GetReportedPredictionMSE() const
+{
+	return static_cast<float>(EvidenceLedger.MeanSquaredPredictionError());
+}
+
 void UIRLExperienceSubsystem::ResetExperience()
 {
+	EvidenceLedger.ResetObjective();
 	CurrentObjective = FIRLObjectiveDefinition();
 	CurrentStepIndex = INDEX_NONE;
 	bExperienceActive = false;
