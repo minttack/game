@@ -2,6 +2,7 @@
 #include "Mobile/IRLMobileJoystickCore.h"
 #include "Misc/AutomationTest.h"
 #include <cmath>
+#include <limits>
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FIRLNativeJoystickMath,
     "IRL.Mobile.JoystickMath",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
