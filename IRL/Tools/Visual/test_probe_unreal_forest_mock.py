@@ -118,6 +118,7 @@ with tempfile.TemporaryDirectory() as temp:
     ue.trace.steep=False
 
     ue.actors=[a for a in ue.actors if a.get_actor_label()!="IRL_Biome_03"]
+    ue.instance_sub.actors=ue.actors  # probe must observe the same removal
     try:probe.main(ue)
     except RuntimeError:pass
     else:raise AssertionError("Missing biome passed")
