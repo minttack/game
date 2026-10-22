@@ -15,6 +15,8 @@ on:
       - 'IRL/Source/IRL/Tests/IRLNativeMobileJoystickTests.cpp'
       - 'IRL/Tests/host_irl_mobile_joystick.cpp'
       - 'IRL/Tests/test_mobile_runtime_joystick_contract.py'
+      - 'IRL/Tools/Visual/audit_android_class_chain.py'
+      - 'IRL/Tools/Visual/test_android_class_chain_mock.py'
       - '.github/workflows/irl-original-graphics.yml'
 
 permissions:
@@ -55,6 +57,7 @@ jobs:
           python IRL/Tools/Visual/test_android_apk_runner.py
           python IRL/Tests/test_android_mobile_contract.py
           python IRL/Tests/test_mobile_runtime_joystick_contract.py
+          python IRL/Tools/Visual/test_android_class_chain_mock.py
           g++ -std=c++17 -O2 -Wall -Wextra -Werror -pedantic -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick
           /tmp/irl-mobile-joystick
           g++ -std=c++17 -O1 -g -Wall -Wextra -Werror -pedantic -fsanitize=undefined -fno-sanitize-recover=all -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick-ubsan
