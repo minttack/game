@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import zipfile
+from android_renderer_gate import validate_android_config, AndroidConfigError
 
 def sha256(path):
     dig = hashlib.sha256()
@@ -53,6 +54,12 @@ def validated_project(project_dir):
         raise RuntimeError("Mobile virtual joysticks are not configured")
     if "UIRLMobileTouchHUD::StaticClass()" not in cc:
         raise RuntimeError("The existing IRL player controller has no native touch HUD fallback")
+    # Reject insecure Android network file-server settings or desktop
+    # Lumen/RT renderer before even attempting Unreal's expensive APK cook.
+    try:
+        validate_android_config(root)
+    except AndroidConfigError as exc:
+        raise RuntimeError("Android safety/rendering preflight: "+str(exc)) from exc
     return root, up
 
 def discover_engine(explicit):
