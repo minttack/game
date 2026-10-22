@@ -118,15 +118,20 @@ def move_avatar_through_real_game_physics():
         # Observe after the pawn has a chance to FALL and land on collision.
         for _ in range(90):
             yield
-        report["samples"].append(_ground_sample(world,character,"grounded_before_move"))
+        report["samples"].append(_ground_sample(world,character,"grounded_before_control"))
 
-        # Use CharacterMovement input, never teleport or move the player by fiat.
+        # CONTROL: measure involuntary sliding / drift without synthetic input.
+        for _ in range(45):
+            yield
+        report["samples"].append(_ground_sample(world,character,"grounded_after_control"))
+
+        # EXPERIMENT: use CharacterMovement input, never teleport the player.
         for _ in range(75):
             character.add_movement_input(unreal.Vector(1.0,0.0,0.0),1.0,True)
             yield
         for _ in range(12):
             yield
-        report["samples"].append(_ground_sample(world,character,"grounded_after_move"))
+        report["samples"].append(_ground_sample(world,character,"grounded_after_input"))
         report["assessment"] = assess_pie(report)
     except Exception as exc:
         report["assessment"] = {"status":"NOT_ESTABLISHED","errors":[str(exc)]}
