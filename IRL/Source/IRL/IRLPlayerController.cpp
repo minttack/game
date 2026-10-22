@@ -9,7 +9,13 @@
 #include "Blueprint/UserWidget.h"
 #include "Experience/IRLExperienceSubsystem.h"
 #include "IRL.h"
+#include "Visual/IRLAdaptiveMobileFidelityComponent.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+
+AIRLPlayerController::AIRLPlayerController()
+{
+    MobileFidelity = CreateDefaultSubobject<UIRLAdaptiveMobileFidelityComponent>(TEXT("MobileFidelity"));
+}
 
 void AIRLPlayerController::BeginPlay()
 {
