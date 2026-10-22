@@ -73,7 +73,8 @@ for name in ['ForestSoil','Granite','LeafGreen']:
         node.set_editor_property('texture',texture)
         ok=unreal.MaterialEditingLibrary.connect_material_property(node,output,property_id)
         if not ok: raise RuntimeError(f'Material connection failed {name} {kind}')
-    unreal.MaterialEditingLibrary.recompile_material(material)
+    errors=unreal.MaterialEditingLibrary.recompile_material(material)
+    if errors: raise RuntimeError(f'Material {name} failed to compile: {list(errors)}')
     editor.save_loaded_asset(material)
     unreal.log(f'IRL: created material {asset_path}')
 
