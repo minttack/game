@@ -31,4 +31,11 @@ Even an excellent APK packager cannot solve this missing runtime input linkage.
 4. Run mobile locomotion matrix: left X/right, left Y/forward/back, diagonals, right yaw/pitch, stop/recenter/deadzone, JUMP press/release, EXPERIENCE when in range, app pause/resume and OS rotation. Log any input failures from UE device logs.
 5. Record real 30 FPS target comparison including p95/p99 CPU and GPU frame time, streaming texture budget, thermals and sustained battery impact. Then bring the original forest into the Android level and integrate independent BIE ecological life and second player after verified networking.
 
-**Disposition:** candidate code implementation, host tests pending exact CI, UE compile/phone test not performed.
+**Disposition (verified):** Feature implementation committed, source-level and native-test validation PASS, real Unreal/Android runtime NOT TESTED.
+
+GitHub Actions run [39851158736](https://github.com/minttack/game/actions/runs/39851158736) completed **success** on the code version for this branch:
+- 13/13 portable C++17 mobile-axis safety scenarios PASS under GCC and again with UndefinedBehaviorSanitizer (13/13).
+- 17/17 static native runtime-joystick mapping contracts PASS.
+- 5/5 mocked native Blueprint class-chain audit scenarios PASS.
+- Inherited original Android packaging fake-UAT tests, mobile source contracts, world evidence, original asset provenance and terrain checks PASS.
+- GH CI intentionally has no Unreal 5.8 executable or Moto G attached; no compilation of UHT-generated controller/UI classes, actual binary Blueprint inspection, real APK or measured phone FPS is established.
