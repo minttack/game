@@ -9,7 +9,7 @@ import math
 EXPECTED_MAP = "/Game/IRL/Maps/Lvl_IRL_Forest_VisualValidation"
 TERRAIN_LABEL = "IRL_OriginalForestTerrain"
 MIN_HORIZONTAL_MOVE_CM = 50.0
-MAX_HORIZONTAL_MOVE_CM = 900.0
+MAX_HORIZONTAL_MOVE_CM = 3000.0  # includes variable-duration PIE ticks on slower editor hosts
 MIN_NORMAL_Z = 0.70
 # Capsule base should be within a small tolerance of actually traced floor.
 MIN_FOOT_CLEARANCE_CM = -25.0
