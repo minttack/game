@@ -33,3 +33,11 @@ Existing Android work had a Windows UE5.8 Development APK packager with a static
 - Real finger controls, phone graphics/thermals, fully autonomous life, cross-phone multiplayer: **NOT verified**.
 
 **BIE correction rule:** Promote a new capability only after observing the relevant independent external evidence. Startup is not gameplay and gameplay is not device thermal performance.
+
+
+## Verified test record — exact CI evidence (same date)
+- GitHub Actions: https://github.com/minttack/game/actions/runs/39854511205, **conclusion SUCCESS** on PR #13 source head \`a1b0305f130ec78e454d782756a64c88acc511ee\`.
+- **14/14** fake-ADB scenarios passed (real device preflight and launch are **not** simulated as actual hardware achievements). Included successful synthetic launch, missing/untrusted phone, unsupported Android/ABI, missing app, unsuccessful launch, vanished process, wrong foreground, malformed evidence, wrong game.
+- Inherited original tests passed: **13/13** radial joystick math under GCC and again UBSan; **17** Android Enhanced Input source contracts; **10** fake APK packaging gates; **18** forest evidence policy cases; **21** synthetic PIE policy cases; image PNG integrity checks, native runner contracts, and original art SHA-256 integrity. CI also produced the reproducible original visual source-art artifact, NOT an APK.
+- The GitHub test runner has **no physical Moto G and no Unreal Engine 5.8 binary**; therefore Android app installation, launch, actual touch control, graphics benchmark and UE compile remain **NOT ESTABLISHED**.
+- This branch is draft and unmerged. The ongoing next gate is a real \`IRL_BUILD_ANDROID_APK_WINDOWS.bat\` source build with Unreal 5.8, then the explicit \`IRL_TEST_ANDROID_DEVICE_WINDOWS.bat --run\` against an authorized installed phone.
