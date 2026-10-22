@@ -8,6 +8,10 @@
 #include "IRLPlayerController.generated.h"
 
 class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+class UEnhancedInputLocalPlayerSubsystem;
+class UEnhancedInputComponent;
 class UUserWidget;
 class UIRLAdaptiveMobileFidelityComponent;
 
@@ -53,6 +57,23 @@ protected:
 	/** Pointer to the mobile controls widget */
 	UPROPERTY()
 	TObjectPtr<UUserWidget> MobileControlsWidget;
+
+    /** Runtime-native joystick mapping uses axis keys from Unreal's built-in
+     * two-stick touch interface. This owns and retains its input assets.
+     * Avoids dependence on uninspected IMC_Default.uasset gamepad mappings.
+     */
+    UPROPERTY(Transient)
+    TObjectPtr<UInputMappingContext> NativeMobileInputContext;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UInputAction> NativeMobileMoveAction;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UInputAction> NativeMobileLookAction;
+
+    void InstallNativeMobileJoystick(UEnhancedInputLocalPlayerSubsystem* Subsystem);
+    void HandleMobileMove(const FInputActionValue& Value);
+    void HandleMobileLook(const FInputActionValue& Value);
 
 	/** If true, the player will use UMG touch controls even if not playing on mobile platforms */
 	UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")
