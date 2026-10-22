@@ -4,7 +4,11 @@ Never replaces the original IRL map; refuses existing named assets by default.
 """
 from pathlib import Path
 import os
+import sys
 import unreal
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from forest_collision_gate import verify_source_manifest
 
 SOURCE_DIR = Path(os.environ.get('IRL_PBR_SOURCE_DIR', str(Path(__file__).resolve().parent / 'Generated')))
 DEST = '/Game/IRL/Visual/ProceduralStarter'
@@ -12,6 +16,10 @@ OVERWRITE = False
 
 if not SOURCE_DIR.exists():
     raise RuntimeError('Run generate_irl_showcase.py first. Set IRL_PBR_SOURCE_DIR to generated folder.')
+
+# Verify every original texture/mesh hash before any Unreal asset is modified.
+verified_count = verify_source_manifest(SOURCE_DIR)
+unreal.log(f'IRL: original PBR source integrity PASS: {verified_count} artifacts')
 
 assets = sorted(list(SOURCE_DIR.glob('T_*.png')) + list(SOURCE_DIR.glob('SM_IRL_*.obj')))
 assert len(assets) == 15, f'Expected 12 textures and 3 meshes, got {len(assets)}'
