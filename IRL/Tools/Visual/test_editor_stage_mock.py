@@ -5,6 +5,8 @@ from pathlib import Path
 import sys
 import types
 import unittest
+import tempfile
+import shutil
 from unittest.mock import patch
 
 HERE=Path(__file__).resolve().parent
@@ -55,6 +57,24 @@ class LevelEditor:
     def save_current_level(self):self.saves+=1;return True
 
 class VisualStageMockTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp=tempfile.TemporaryDirectory()
+        cls.fixture=Path(cls._tmp.name)
+        target=cls.fixture/'SM_IRL_TerrainPatch.obj'
+        original=HERE/'Generated'/'SM_IRL_TerrainPatch.obj'
+        if original.is_file():
+            shutil.copyfile(original,target)
+        else:
+            with target.open('w', encoding='utf-8') as f:
+                for j in range(65):
+                    for i in range(65):
+                        x,y=-4000+125*i,-4000+125*j
+                        f.write(f'v {x:.3f} {y:.3f} {x*.008+y*.004:.3f}\n')
+
+    @classmethod
+    def tearDownClass(cls):cls._tmp.cleanup()
+
     def setUp(self):
         self.editor=ActorEditor();self.level=LevelEditor()
         fake=types.ModuleType('unreal')
@@ -71,7 +91,7 @@ class VisualStageMockTests(unittest.TestCase):
         fake.log_warning=lambda *_:None
         self.module_mock=patch.dict(sys.modules,{'unreal':fake})
         self.module_mock.start()
-        self.env=patch.dict(os.environ,{'IRL_PBR_SOURCE_DIR':str(HERE/'Generated')},clear=False)
+        self.env=patch.dict(os.environ,{'IRL_PBR_SOURCE_DIR':str(self.fixture)},clear=False)
         self.env.start()
         sys.modules.pop('assemble_irl_stage',None)
 
