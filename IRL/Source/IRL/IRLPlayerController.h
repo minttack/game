@@ -9,6 +9,7 @@
 
 class UInputMappingContext;
 class UUserWidget;
+class UIRLAdaptiveMobileFidelityComponent;
 
 /**
  *  Basic PlayerController class for a third person game
@@ -19,7 +20,13 @@ class AIRLPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+    AIRLPlayerController();
+
 protected:
+    /** Mobile-only: observes frame times and revises LOCAL visual quality. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="IRL|Mobile Fidelity")
+    TObjectPtr<UIRLAdaptiveMobileFidelityComponent> MobileFidelity;
 	/** Advances the active BIE experience one evidence step. */
 	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
 	void AdvanceIRLExperience();
