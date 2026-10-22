@@ -11,6 +11,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from forest_scene_plan import build_plan, verify_plan, ObjectPlacement
+from forest_collision_gate import ensure_imported_ground_collision, require_walkable_terrain_component
 
 BASE_MAP = "/Game/ThirdPerson/Lvl_ThirdPerson"
 NEW_MAP = "/Game/IRL/Maps/Lvl_IRL_Forest_VisualValidation"
@@ -70,6 +71,11 @@ def make(unreal):
 
     plan = build_plan()
     verify_plan(plan)
+    # Missing collision used to create convincing but unplayable scenes. Check
+    # the imported terrain asset BEFORE cloning or writing another level.
+    ensure_imported_ground_collision(unreal, terrain,
+        ASSETS + '/SM_IRL_TerrainPatch', asset_library.save_loaded_asset)
+    asset_library.make_directory('/Game/IRL/Maps')
     if not level_editor.new_level_from_template(NEW_MAP, BASE_MAP):
         raise RuntimeError("Failed to clone original map into non-destructive validation level")
 
@@ -77,7 +83,8 @@ def make(unreal):
     biome_count = 0
     for placement in plan:
         if placement.category == "terrain":
-            _materialize_mesh(unreal, editor_actors, placement, terrain, soil_mat)
+            terrain_actor = _materialize_mesh(unreal, editor_actors, placement, terrain, soil_mat)
+            require_walkable_terrain_component(unreal, terrain_actor)
         elif placement.category == "rock":
             _materialize_mesh(unreal, editor_actors, placement, rock, rock_mat)
         elif placement.category == "biome":
