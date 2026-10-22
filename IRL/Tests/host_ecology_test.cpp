@@ -7,9 +7,9 @@ int tests=0;
 {
  Habitat H(3,3,12);assert(H.Valid());assert(!H.SetTile(0,0,Tile{3,2,0,0,false}));
  assert(H.SetTile(1,1,Tile{2,2,0,0,false}));assert(H.AddCreature(1,1));
- auto S=H.Step(1,Policy::AlwaysForage);assert(S.Valid&&S.DidConsumeFood&&S.FoodBefore==2&&S.FoodAfter==1);assert(S.EnergyAfter==67);assert(H.TileAt(1,1).Food==1);++tests;
+ auto S=H.Step(1,Policy::AlwaysForage);assert(S.Valid&&S.DidConsumeFood&&S.FoodBefore==2&&S.FoodAfter==1);assert(S.EnergyAfter==67);assert(H.TileAt(1,1).Food==1);assert(H.FoodConsumed()==1);++tests;
  auto T=H.Step(1,Policy::AlwaysForage);assert(T.DidConsumeFood&&T.FoodAfter==0);
- auto U=H.Step(1,Policy::AlwaysForage);assert(!U.DidConsumeFood&&U.FoodAfter==0);++tests;
+ auto U=H.Step(1,Policy::AlwaysForage);assert(!U.DidConsumeFood&&U.FoodAfter==0);assert(H.FoodConsumed()==2);++tests;
  H.Regrow();assert(H.TileAt(1,1).Food==0);++tests;
 }
 {
