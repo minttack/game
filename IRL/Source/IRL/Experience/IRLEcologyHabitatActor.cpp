@@ -67,16 +67,7 @@ void AIRLEcologyHabitatActor::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     if (!HasAuthority() || !Runtime) { return; }
 
-    const auto Before = Runtime->Residents();
-    const auto Count = Before.size();
     Runtime->StepEveryone(IRLEcology::Policy::BIE);
-    const auto& After = Runtime->Residents();
-    for (std::size_t I = 0; I < Count && I < After.size(); ++I)
-    {
-        // Directly witnessed consumptions: compare depleted food units separately
-        // in the native receipts for research; counter below is intentionally
-        // only available when explicitly observed through controlled stepping.
-    }
     if (bAllowDescendants && Runtime->WorldTicks() % 15 == 0)
     {
         const auto& Residents = Runtime->Residents();
@@ -91,6 +82,11 @@ void AIRLEcologyHabitatActor::Tick(float DeltaSeconds)
         }
     }
     RefreshVisuals();
+}
+
+int32 AIRLEcologyHabitatActor::TotalFoodConsumed() const
+{
+    return Runtime ? static_cast<int32>(FMath::Min<uint64>(Runtime->FoodConsumed(), MAX_int32)) : 0;
 }
 
 int32 AIRLEcologyHabitatActor::LivingCreatureCount() const
