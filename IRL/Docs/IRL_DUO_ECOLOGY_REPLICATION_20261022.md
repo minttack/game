@@ -13,9 +13,9 @@ The ecology habitat actor previously set \`bReplicates = false\`. The simulation
 - No new language model dependency. Learning remains the independent non-LLM BIE-style engine.
 
 ## Evidence and scope
-\`IRL/Tests/host_habitat_snapshot_test.cpp\`: **10/10** native C++17 policy groups passed locally on GCC 14.2 under \`-O2 -Wall -Wextra -Werror -pedantic\`; same **10/10** passed with AddressSanitizer and UBSan. Tests include 32×32 maximum cells, 40 stable creature IDs, mixed duplicates/malformed cells, bad dimensions/sizes, late and duplicate sequences, and payload estimate. The native header was SHA256-verified after source upload, and checked against the developer's working copy. These are **codec tests only**.
+\`IRL/Tests/host_habitat_snapshot_test.cpp\`: **10/10** native C++17 policy groups passed locally on GCC 14.2 under \`-O2 -Wall -Wextra -Werror -pedantic\`; same **10/10** passed with AddressSanitizer and UBSan. Tests include 32×32 maximum cells, 40 stable creature IDs, mixed duplicates/malformed cells, bad dimensions/sizes, late and duplicate sequences, and payload estimate. The corrected uploaded native header has Git blob SHA-1 `26b8951d255bd8fe4b0cad538f69e6474693a680`, matching the exact locally compiled header (not merely a similar implementation). These are **codec tests only**.
 
-Unreal Engine 5.8 compilation, property serialization, actual network packet measurements, Listen Server + 2 clients, late joining, physics/visual behavior, frame-rate, Moto G devices and Android APK packaging remain **NOT TESTED** in this environment. The underlying proxy actor must still be placed in the level; no binary \`.umap\` edit was made.
+Unreal Engine 5.8 compilation, new `IRL.Experience.HabitatSnapshotCodec` engine test, property serialization, actual network packet measurements, Listen Server + 2 clients, late joining, physics/visual behavior, frame-rate, Moto G devices and Android APK packaging remain **NOT TESTED** in this environment. The underlying proxy actor must still be placed in the level; no binary \`.umap\` edit was made.
 
 ## Next integration gates
 1. Compile UE 5.8, run original \`IRL.Experience.FirstSignalLifecycle\`, \`IRL.Experience.GroundedEcology\`, and all new native snapshot tests. Correct any UnrealHeaderTool constraints.
