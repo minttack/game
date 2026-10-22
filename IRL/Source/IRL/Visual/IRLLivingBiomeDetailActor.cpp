@@ -28,6 +28,7 @@ AIRLLivingBiomeDetailActor::AIRLLivingBiomeDetailActor()
 void AIRLLivingBiomeDetailActor::BeginPlay()
 {
     Super::BeginPlay();
+    if (GetNetMode() == NM_DedicatedServer) { return; }
 #if PLATFORM_ANDROID
     ApplyVisualTier(1); // device profile starts conservatively on Android
 #else
@@ -43,9 +44,27 @@ void AIRLLivingBiomeDetailActor::ApplyVisualTier(int32 NewTier)
     Rebuild();
 }
 
+void AIRLLivingBiomeDetailActor::BuildPlacementCache()
+{
+    if (bPlacementCacheBuilt || !GetWorld()) { return; }
+    // Maximum-detail candidate transforms are calculated ONCE. Quality
+    // changes reuse these results, preventing repeated world raycasts.
+    CachedGroundCover.Reset();
+    CachedStone.Reset();
+    CachedLitter.Reset();
+    FRandomStream GroundRandom(Seed);
+    FRandomStream StoneRandom(Seed ^ 0x1735);
+    FRandomStream LitterRandom(Seed ^ 0x5e21);
+    CachePositions(CachedGroundCover,460,GroundRandom,0.60f,MinimumWalkableNormalZ);
+    CachePositions(CachedStone,75,StoneRandom,0.25f,0.45f);
+    CachePositions(CachedLitter,190,LitterRandom,0.25f,MinimumWalkableNormalZ);
+    bPlacementCacheBuilt = true;
+}
+
 void AIRLLivingBiomeDetailActor::Rebuild()
 {
-    if (!GetWorld()) { return; }
+    if (!GetWorld() || GetNetMode() == NM_DedicatedServer) { return; }
+    BuildPlacementCache();
     GroundCoverInstances->ClearInstances();
     StoneInstances->ClearInstances();
     LeafLitterInstances->ClearInstances();
@@ -58,29 +77,21 @@ void AIRLLivingBiomeDetailActor::Rebuild()
     if (StoneMaterial) { StoneInstances->SetMaterial(0,StoneMaterial); }
     if (LeafLitterMaterial) { LeafLitterInstances->SetMaterial(0,LeafLitterMaterial); }
 
-    FRandomStream GroundRandom(Seed);
-    FRandomStream StoneRandom(Seed ^ 0x1735);
-    FRandomStream LitterRandom(Seed ^ 0x5e21);
     const int32 GroundCount[] = { 90, 230, 460 };
     const int32 StoneCount[] = { 20, 45, 75 };
     const int32 LitterCount[] = { 35, 90, 190 };
-    Populate(GroundCoverInstances,GroundCount[LastTier],GroundRandom,
-        0.60f,MinimumWalkableNormalZ,4000.0f);
-    Populate(StoneInstances,StoneCount[LastTier],StoneRandom,
-        0.25f,0.45f,11000.0f);
-    Populate(LeafLitterInstances,LitterCount[LastTier],LitterRandom,
-        0.25f,MinimumWalkableNormalZ,2200.0f);
+    PopulateFromCache(GroundCoverInstances,CachedGroundCover,GroundCount[LastTier],4000.0f);
+    PopulateFromCache(StoneInstances,CachedStone,StoneCount[LastTier],11000.0f);
+    PopulateFromCache(LeafLitterInstances,CachedLitter,LitterCount[LastTier],2200.0f);
 }
 
-void AIRLLivingBiomeDetailActor::Populate(UHierarchicalInstancedStaticMeshComponent* Instances,
-    int32 Count, FRandomStream& Random, float BaseScale,
-    float MaximumSlopeZ, float CullDistanceCm)
+void AIRLLivingBiomeDetailActor::CachePositions(TArray<FTransform>& Out,
+    int32 MaxCount, FRandomStream& Random, float BaseScale, float MinimumNormalZ)
 {
-    if (!Instances || !Instances->GetStaticMesh() || !GetWorld()) { return; }
-    Instances->SetCullDistances(300, static_cast<int32>(CullDistanceCm));
+    if (!GetWorld()) { return; }
     const float Radius = FMath::Clamp(PatchRadiusCm,100.0f,5000.0f);
     FCollisionQueryParams Params(SCENE_QUERY_STAT(IRLBiomeTrace),false,this);
-    for (int32 I=0; I<Count; ++I)
+    for (int32 I=0; I<MaxCount; ++I)
     {
         const float Angle = Random.FRandRange(0.0f, UE_TWO_PI);
         const float Distance = FMath::Sqrt(Random.FRand()) * Radius;
@@ -91,12 +102,24 @@ void AIRLLivingBiomeDetailActor::Populate(UHierarchicalInstancedStaticMeshCompon
             Origin + FVector(0,0,1500.0f),
             Origin - FVector(0,0,3000.0f),
             ECC_WorldStatic,Params);
-        if (!bGrounded || Hit.ImpactNormal.Z < MaximumSlopeZ) { continue; }
+        if (!bGrounded || Hit.ImpactNormal.Z < MinimumNormalZ) { continue; }
         const FVector Local = GetActorTransform().InverseTransformPosition(Hit.ImpactPoint);
         const float Scale = BaseScale * Random.FRandRange(0.75f,1.30f);
-        const FTransform Transform(FRotator(0,Random.FRandRange(0.0f,360.0f),0),
-            Local,FVector(Scale));
-        Instances->AddInstance(Transform);
+        Out.Add(FTransform(FRotator(0,Random.FRandRange(0.0f,360.0f),0),
+            Local,FVector(Scale)));
+    }
+}
+
+void AIRLLivingBiomeDetailActor::PopulateFromCache(
+    UHierarchicalInstancedStaticMeshComponent* Instances,
+    const TArray<FTransform>& Cached, int32 Count, float CullDistanceCm)
+{
+    if (!Instances || !Instances->GetStaticMesh()) { return; }
+    Instances->SetCullDistances(300,static_cast<int32>(CullDistanceCm));
+    const int32 Limit = FMath::Min(Count,Cached.Num());
+    for (int32 I=0;I<Limit;++I)
+    {
+        Instances->AddInstance(Cached[I]);
         ++LastInstanceCount;
     }
 }
