@@ -4,10 +4,28 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Experience/IRLEcologyCore.h"
+#include "Experience/IRLHabitatSnapshotCore.h"
 #include "IRLEcologyHabitatActor.generated.h"
 
 class USceneComponent;
 class UInstancedStaticMeshComponent;
+
+/** Single replicated visual snapshot. The server alone runs BIE life decisions. */
+USTRUCT()
+struct FIRLHabitatVisualFrame
+{
+    GENERATED_BODY()
+
+    UPROPERTY() uint32 Sequence = 0;
+    UPROPERTY() uint8 Width = 0;
+    UPROPERTY() uint8 Height = 0;
+    UPROPERTY() float CellSizeCm = 200.0f;
+    UPROPERTY() int64 CompletedExperienceCycles = 0;
+    UPROPERTY() int64 FoodConsumed = 0;
+    UPROPERTY() TArray<uint16> FoodCells;
+    UPROPERTY() TArray<uint16> CreatureCells;
+    UPROPERTY() TArray<int64> CreatureIds;
+};
 
 /** Small, independently simulated ecosystem visible inside the existing IRL world. */
 UCLASS(Blueprintable)
@@ -18,6 +36,7 @@ public:
     AIRLEcologyHabitatActor();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
     UFUNCTION(BlueprintPure, Category="IRL|BIE Habitat")
     int32 LivingCreatureCount() const;
@@ -57,6 +76,17 @@ protected:
     bool bAllowDescendants = true;
 
 private:
-    TUniquePtr<IRLEcology::Habitat> Runtime;
-    void RefreshVisuals();
+    // This actor is relevant for BOTH players in a single controlled habitat.
+    // Do not set all large-world ecosystems to globally relevant.
+    UPROPERTY(ReplicatedUsing=OnRep_VisualFrame)
+    FIRLHabitatVisualFrame VisualFrame;
+
+    UFUNCTION()
+    void OnRep_VisualFrame();
+
+    TUniquePtr<IRLEcology::Habitat> Runtime; // server only
+    uint32 LastAppliedSequence = 0;
+    bool BuildNativeFrame(IRLHabitatNet::Frame& Out) const;
+    void CaptureVisualFrame();                 // server only
+    void RefreshVisuals(const IRLHabitatNet::Frame& Frame);
 };
