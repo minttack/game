@@ -29,12 +29,22 @@ jobs:
       - name: Validate original source tools
         run: |
           python -m compileall -q IRL/Tools/Visual IRL/Content/Python
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('IRL/IRL.uproject').read_text())
+          required={'PythonScriptPlugin','EditorScriptingUtilities','PythonAutomationTest','FunctionalTestingEditor'}
+          actual={x['Name'] for x in p['Plugins'] if x.get('Enabled') and 'Editor' in x.get('TargetAllowList',[])}
+          assert p['EngineAssociation']=='5.8' and required<=actual, (required-actual)
+          print('PASS required Unreal 5.8 editor-only scripting plugins, game not modified')
+          PY
           python IRL/Tools/Visual/test_generated_assets.py
           python IRL/Tools/Visual/test_mobile_capture.py
           python IRL/Tools/Visual/test_forest_collision_gate.py
           python IRL/Tools/Visual/test_forest_world_evidence.py
           python IRL/Tools/Visual/test_forest_pie_evidence.py
           python IRL/Tools/Visual/test_forest_screenshot_evidence.py
+          python IRL/Tools/Visual/test_native_forest_runner.py
           python IRL/Tools/Visual/test_probe_unreal_forest_mock.py
           python IRL/Tools/Visual/test_scene_plan.py
           python IRL/Tools/Visual/test_editor_scene_builder.py
