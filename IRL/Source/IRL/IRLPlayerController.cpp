@@ -151,6 +151,10 @@ void AIRLPlayerController::InstallNativeMobileJoystick(
     if (!NativeMobileInputContext || !NativeMobileMoveAction || !NativeMobileLookAction) { return; }
     NativeMobileMoveAction->ValueType = EInputActionValueType::Axis2D;
     NativeMobileLookAction->ValueType = EInputActionValueType::Axis2D;
+    // Each joystick emits separate X and Y keys; both MUST contribute.
+    // Enhanced Input's default "highest absolute" would drop one dimension.
+    NativeMobileMoveAction->AccumulationBehavior = EInputActionAccumulationBehavior::Cumulative;
+    NativeMobileLookAction->AccumulationBehavior = EInputActionAccumulationBehavior::Cumulative;
     NativeMobileMoveAction->bConsumeInput = true;
     NativeMobileLookAction->bConsumeInput = true;
 
