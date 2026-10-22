@@ -54,6 +54,7 @@ jobs:
           python IRL/Tools/Visual/test_forest_pie_evidence.py
           python IRL/Tools/Visual/test_forest_screenshot_evidence.py
           python IRL/Tools/Visual/test_native_forest_runner.py
+          python IRL/Tools/Visual/test_android_renderer_gate.py
           python IRL/Tools/Visual/test_android_apk_runner.py
           python IRL/Tests/test_android_mobile_contract.py
           python IRL/Tests/test_mobile_runtime_joystick_contract.py
