@@ -6,9 +6,7 @@ Does not create, replace or save gameplay levels or add fake CGI imagery.
 """
 from datetime import datetime, timezone
 from pathlib import Path
-import hashlib
 import json
-import struct
 import sys
 import time
 import unreal
@@ -17,6 +15,7 @@ TOOLS = Path(__file__).resolve().parents[2] / "Tools" / "Visual"
 sys.path.insert(0, str(TOOLS))
 from forest_world_evidence import EXPECTED_MAP
 from probe_unreal_forest import main as audit
+from forest_screenshot_evidence import verify_capture_png
 
 NAME = "IRL_First_Actual_Unreal_Forest_1280x720"
 state = {}
@@ -32,14 +31,6 @@ def _matching_pngs(saved_dir, started_at):
         [p for p in folder.rglob("*.png") if NAME in p.stem and
          p.stat().st_mtime >= started_at-3],
         key=lambda p:p.stat().st_mtime,reverse=True)
-
-
-def _png_dimensions(path):
-    with Path(path).open("rb") as f:
-        header=f.read(24)
-    if len(header)<24 or header[:8]!=b"\x89PNG\r\n\x1a\n" or header[12:16]!=b"IHDR":
-        raise RuntimeError("Saved screenshot is not a valid PNG header")
-    return struct.unpack(">II",header[16:24])
 
 
 @unreal.AutomationScheduler.add_latent_command
@@ -84,22 +75,18 @@ def capture_real_unreal_pixels():
             "Screenshot task completed but no matching PNG is readable in Project/Saved; "
             "check Unreal Automation screenshot storage; do not claim success")
     filepath=files[0]
-    dimensions=_png_dimensions(filepath)
-    if dimensions!=(1280,720):
-        raise RuntimeError("Incorrect captured Unreal screenshot size: "+str(dimensions))
-    size=filepath.stat().st_size
-    if size<10_000:
-        raise RuntimeError("Unreal screenshot looks incomplete or too small")
+    verified=verify_capture_png(filepath,expected=(1280,720))
     evidence={
         "source":"actual_unreal_editor_image_file",
         "project":"ONE IRL Unreal Engine 5.8 game",
         "map":EXPECTED_MAP,
         "captured_utc":now.isoformat(),
         "file":str(filepath),
-        "sha256":hashlib.sha256(filepath.read_bytes()).hexdigest(),
-        "size_bytes":size,
-        "width":dimensions[0],
-        "height":dimensions[1],
+        "sha256":verified["sha256"],
+        "size_bytes":verified["bytes"],
+        "width":verified["width"],
+        "height":verified["height"],
+        "file_format_check":verified["verified_format"],
         "physics_preflight":state["audit"],
         "device":"DESKTOP_UNREAL_EDITOR_NOT_ANDROID",
         "disposition":"SCREENSHOT_FILE_VERIFIED_NOT_AAA_OR_GAMEPLAY_PROOF",
