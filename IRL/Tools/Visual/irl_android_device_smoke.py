@@ -60,7 +60,7 @@ def foreground_package(dumpsys):
     for line in dumpsys.splitlines():
         if any(key in line for key in ("mResumedActivity", "topResumedActivity",
                                       "mCurrentFocus", "mFocusedApp")):
-            match=re.search(r"\b(com\.[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)+)\s*/",line)
+            match=re.search(r"\b(com\.[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*)\s*/",line)
             if match:return match.group(1)
     return None
 
