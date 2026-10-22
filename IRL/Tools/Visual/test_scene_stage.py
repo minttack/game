@@ -3,10 +3,23 @@ from pathlib import Path
 import ast
 import math
 import unittest
+import tempfile
 from scene_stage_core import TerrainHeightfield, plan_stage, confirm_assets, classify_existing, TAG
 
 HERE=Path(__file__).resolve().parent
 TERRAIN=HERE/'Generated'/'SM_IRL_TerrainPatch.obj'
+# CI can run without the generated artwork files. A synthetic 65x65 test
+# grid exercises indexing; when original generated OBJ exists, test that too.
+_TEST_DIRECTORY=None
+if not TERRAIN.is_file():
+    _TEST_DIRECTORY=tempfile.TemporaryDirectory()
+    TERRAIN=Path(_TEST_DIRECTORY.name)/'SM_IRL_TerrainPatch.obj'
+    with TERRAIN.open('w', encoding='utf-8') as f:
+        f.write('# Host-only synthetic terrain fixture; NOT game art\n')
+        for j in range(65):
+            for i in range(65):
+                x,y=-4000+125*i,-4000+125*j
+                f.write(f'v {x:.3f} {y:.3f} {x*0.008+y*0.004:.3f}\n')
 
 class StageTests(unittest.TestCase):
     def setUp(self):
