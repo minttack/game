@@ -32,10 +32,10 @@ def assess_pie(report):
     if report.get("game_world") is not True or report.get("possessed_character") is not True:
         errors.append("No actual possessed character in PIE game world")
     samples=report.get("samples")
-    if not isinstance(samples, list) or len(samples)!=2:
-        errors.append("Must record exactly two distinct game-state observations")
+    if not isinstance(samples, list) or len(samples)!=3:
+        errors.append("Must record before-control, after-control and post-input observations")
         samples=[]
-    expected_stages=("grounded_before_move","grounded_after_move")
+    expected_stages=("grounded_before_control","grounded_after_control","grounded_after_input")
     for i, sample in enumerate(samples):
         if not isinstance(sample,dict):
             errors.append("Malformed game-state observation")
@@ -58,17 +58,21 @@ def assess_pie(report):
         h=sample.get("capsule_half_height_cm")
         if not _real(h) or not 30.0 <= h <= 250.0:
             errors.append("Character capsule height absent or implausible")
-    if len(samples)==2 and all(isinstance(x,dict) and _position(x.get("position_cm")) for x in samples):
-        before,after=samples[0]["position_cm"],samples[1]["position_cm"]
-        moved=math.hypot(after[0]-before[0],after[1]-before[1])
+    if len(samples)==3 and all(isinstance(x,dict) and _position(x.get("position_cm")) for x in samples):
+        before,control,moved_to=(x["position_cm"] for x in samples)
+        idle_drift=math.hypot(control[0]-before[0],control[1]-before[1])
+        moved=math.hypot(moved_to[0]-control[0],moved_to[1]-control[1])
+        if idle_drift > 35.0:
+            errors.append("No-input control drift is too high to attribute later movement to input")
         if not MIN_HORIZONTAL_MOVE_CM <= moved <= MAX_HORIZONTAL_MOVE_CM:
-            errors.append("No believable horizontal movement through game input")
+            errors.append("No believable horizontal movement after game input")
     else:
-        moved=None
+        idle_drift=moved=None
     result={
         "status":"PIE_REVIEW_ELIGIBLE" if not errors else "NOT_ESTABLISHED",
         "errors":sorted(set(errors)),
-        "horizontal_movement_cm":round(moved,3) if moved is not None else None,
+        "no_input_drift_cm":round(idle_drift,3) if idle_drift is not None else None,
+        "input_movement_cm":round(moved,3) if moved is not None else None,
         "limitations":[
             "Script-reported engine measurements are not independently authenticated.",
             "This PIE result is not an Android FPS, thermals or two-player validation.",
