@@ -22,14 +22,15 @@ class AIRLPlayerController : public APlayerController
 	
 public:
     AIRLPlayerController();
+    /** Mobile action entrypoint: respects existing objective gates and local ownership. */
+    UFUNCTION(BlueprintCallable, Category="IRL|Experience")
+    void AdvanceIRLExperience();
 
 protected:
     /** Mobile-only: observes frame times and revises LOCAL visual quality. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="IRL|Mobile Fidelity")
     TObjectPtr<UIRLAdaptiveMobileFidelityComponent> MobileFidelity;
-	/** Advances the active BIE experience one evidence step. */
-	UFUNCTION(BlueprintCallable, Category = "IRL|Experience")
-	void AdvanceIRLExperience();
+
 
 	UFUNCTION()
 	void HandleExperienceAdvanced(EIRLExperiencePhase Phase, const FText& BlueGuidance, const FText& BIEStatement);
