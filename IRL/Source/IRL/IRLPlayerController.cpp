@@ -184,6 +184,18 @@ void AIRLPlayerController::InstallNativeMobileJoystick(
     UE_LOG(LogIRL, Display, TEXT("IRL Android: local native joystick actions mapped"));
 }
 
+void AIRLPlayerController::RecordMobileInput(IRLMobileEvidence::InputKind Kind)
+{
+#if PLATFORM_ANDROID
+    if (IsLocalPlayerController() && MobileFidelity)
+    {
+        MobileFidelity->RecordMobileInput(Kind);
+    }
+#else
+    (void)Kind;
+#endif
+}
+
 void AIRLPlayerController::HandleMobileMove(const FInputActionValue& Value)
 {
     if (!IsLocalPlayerController()) { return; }
@@ -193,6 +205,8 @@ void AIRLPlayerController::HandleMobileMove(const FInputActionValue& Value)
         const IRLMobile::Axis2D Clean = IRLMobile::FilterJoystick(
             static_cast<float>(Raw.X), static_cast<float>(Raw.Y));
         Character->DoMove(Clean.X,Clean.Y);
+        if (Clean.X != 0.0f || Clean.Y != 0.0f)
+            RecordMobileInput(IRLMobileEvidence::InputKind::MoveAxis);
     }
 }
 
@@ -205,6 +219,8 @@ void AIRLPlayerController::HandleMobileLook(const FInputActionValue& Value)
         const IRLMobile::Axis2D Clean = IRLMobile::FilterJoystick(
             static_cast<float>(Raw.X), static_cast<float>(Raw.Y),0.08f);
         Character->DoLook(Clean.X,Clean.Y);
+        if (Clean.X != 0.0f || Clean.Y != 0.0f)
+            RecordMobileInput(IRLMobileEvidence::InputKind::LookAxis);
     }
 }
 
