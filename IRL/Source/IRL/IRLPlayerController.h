@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Experience/IRLExperienceTypes.h"
+#include "Mobile/IRLMobileEvidenceCore.h"
 #include "GameFramework/PlayerController.h"
 #include "IRLPlayerController.generated.h"
 
@@ -29,6 +30,8 @@ public:
     /** Mobile action entrypoint: respects existing objective gates and local ownership. */
     UFUNCTION(BlueprintCallable, Category="IRL|Experience")
     void AdvanceIRLExperience();
+    /** On-device source evidence: AXIS callbacks and action presses, not player outcomes. */
+    void RecordMobileInput(IRLMobileEvidence::InputKind Kind);
 
 protected:
     /** Mobile-only: observes frame times and revises LOCAL visual quality. */

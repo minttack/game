@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Visual/IRLVisualBudgetCore.h"
+#include "Mobile/IRLMobileEvidenceCore.h"
 #include "IRLAdaptiveMobileFidelityComponent.generated.h"
 
 UCLASS(ClassGroup=(IRL), meta=(BlueprintSpawnableComponent))
@@ -11,6 +12,8 @@ class IRL_API UIRLAdaptiveMobileFidelityComponent : public UActorComponent
     GENERATED_BODY()
 public:
     UIRLAdaptiveMobileFidelityComponent();
+    /** Count input callbacks on the local Android client, never remote players. */
+    void RecordMobileInput(IRLMobileEvidence::InputKind Kind);
     virtual void BeginPlay() override;
     virtual void TickComponent(float DeltaTime, ELevelTick TickType,
         FActorComponentTickFunction* ThisTickFunction) override;
@@ -33,5 +36,8 @@ public:
         FMath::Min<uint64>(Budget.RejectedSamples(),static_cast<uint64>(MAX_int32))); }
 private:
     IRLVisual::BudgetController Budget;
+    IRLMobileEvidence::Recorder MobileEvidence;
+    FString MobileEvidenceSessionId;
+    uint32 MobileEvidenceWindowIndex = 0;
     void ApplyTier(IRLVisual::Tier Tier);
 };

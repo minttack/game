@@ -12,6 +12,9 @@ on:
       - 'IRL/Tests/test_android_mobile_contract.py'
       - 'IRL/Config/**'
       - 'IRL/Source/IRL/IRLPlayerController.*'
+      - 'IRL/Source/IRL/Visual/IRLAdaptiveMobileFidelityComponent.*'
+      - 'IRL/Source/IRL/Mobile/IRLMobileEvidenceCore.h'
+      - 'IRL/Tests/host_irl_mobile_evidence.cpp'
       - 'IRL/Source/IRL/Tests/IRLNativeMobileJoystickTests.cpp'
       - 'IRL/Tests/host_irl_mobile_joystick.cpp'
       - 'IRL/Tests/test_mobile_runtime_joystick_contract.py'
@@ -60,10 +63,16 @@ jobs:
           python IRL/Tests/test_mobile_runtime_joystick_contract.py
           python IRL/Tools/Visual/test_android_class_chain_mock.py
           python IRL/Tools/Visual/test_android_device_smoke.py
+          python IRL/Tools/Visual/test_irl_mobile_evidence_report.py
+          python IRL/Tests/test_mobile_observability_contract.py
           g++ -std=c++17 -O2 -Wall -Wextra -Werror -pedantic -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick
           /tmp/irl-mobile-joystick
           g++ -std=c++17 -O1 -g -Wall -Wextra -Werror -pedantic -fsanitize=undefined -fno-sanitize-recover=all -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick-ubsan
           /tmp/irl-mobile-joystick-ubsan
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror -pedantic -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_evidence.cpp -o /tmp/irl-mobile-evidence
+          /tmp/irl-mobile-evidence
+          g++ -std=c++17 -O1 -g -Wall -Wextra -Werror -pedantic -fsanitize=undefined -fno-sanitize-recover=all -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_evidence.cpp -o /tmp/irl-mobile-evidence-ubsan
+          /tmp/irl-mobile-evidence-ubsan
           python IRL/Tools/Visual/test_probe_unreal_forest_mock.py
           python IRL/Tools/Visual/test_scene_plan.py
           python IRL/Tools/Visual/test_editor_scene_builder.py
