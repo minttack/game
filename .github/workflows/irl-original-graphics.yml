@@ -30,6 +30,7 @@ jobs:
           python IRL/Tools/Visual/test_mobile_capture.py
           python IRL/Tools/Visual/test_scene_plan.py
           python IRL/Tools/Visual/test_editor_scene_builder.py
+          python IRL/Tools/Visual/test_forest_verifier_evidence.py
       - name: Generate a reproducible original starter asset pack
         run: |
           python IRL/Tools/Visual/generate_irl_showcase.py --size 512 --seed 20261022 --out IRL/Tools/Visual/Generated
