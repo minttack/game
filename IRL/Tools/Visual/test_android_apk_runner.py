@@ -5,6 +5,7 @@ import tempfile
 import json
 import os
 import zipfile
+import shutil
 from pathlib import Path
 import irl_android_apk_runner as runner
 
@@ -23,6 +24,15 @@ def fake_tree(folder, behaviour="ok"):
         "UIRLMobileTouchHUD::StaticClass()\n")
     (root/"Source"/"IRL"/"Mobile"/"IRLMobileTouchHUD.cpp").write_text(
         "IRL Touch HUD\n")
+    # Use exact live IRL renderer and device-profile configs in fake source
+    # tree: regression mocks may not invent an unsafe 'passing' configuration.
+    from pathlib import Path as _Path
+    original=_Path(__file__).resolve().parents[2]/"Config"
+    for relative in ("DefaultEngine.ini", "DefaultInput.ini",
+                     "DefaultDeviceProfiles.ini", "Android/AndroidEngine.ini"):
+        dest=root/"Config"/relative
+        dest.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(original/relative,dest)
     engine=Path(folder)/"UE_5.8"
     uat=engine/"Engine"/"Build"/"BatchFiles"/"RunUAT.bat"
     uat.parent.mkdir(parents=True)
@@ -92,5 +102,23 @@ with tempfile.TemporaryDirectory() as folder:
     try:runner.validated_project(root)
     except RuntimeError as exc: assert "Wrong Unreal Engine" in str(exc)
     else:raise AssertionError("Wrong game accepted")
+    cases+=1
+# Packaging must fail BEFORE RunUAT if a desktop graphics regression or
+# previously exposed Android file server is re-enabled.
+with tempfile.TemporaryDirectory() as folder:
+    root,engine=fake_tree(folder)
+    overlay=root/"Config"/"Android"/"AndroidEngine.ini"
+    overlay.write_text(overlay.read_text().replace("r.Mobile.ShadingPath=0","r.Mobile.ShadingPath=1"))
+    _,record=runner.execute(root,engine)
+    assert record["status"]=="NOT_ESTABLISHED" and "Android safety/rendering preflight" in record["error"]
+    assert "command" not in record
+    cases+=1
+with tempfile.TemporaryDirectory() as folder:
+    root,engine=fake_tree(folder)
+    config=root/"Config"/"DefaultEngine.ini"
+    config.write_text(config.read_text().replace("bEnablePlugin=False","bEnablePlugin=True"))
+    _,record=runner.execute(root,engine)
+    assert record["status"]=="NOT_ESTABLISHED" and "Android safety/rendering preflight" in record["error"]
+    assert "command" not in record
     cases+=1
 print("PASS",cases,"Android packaging contract scenarios using fake UAT; NO real APK built")
