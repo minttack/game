@@ -68,4 +68,10 @@ with tempfile.TemporaryDirectory() as tmp:
     checks+=1
     assert b["adb_in_path"] in (True,False)
     checks+=1
+# Antigravity MCP instructions must never publish a remote tool server.
+mcp=json.loads((Path(__file__).with_name("mcp_config.EXAMPLE.json")).read_text())
+assert set(mcp["mcpServers"])=={"unreal-mcp"}
+assert mcp["mcpServers"]["unreal-mcp"]["serverUrl"]=="http://127.0.0.1:[YOUR_PORT]/mcp"
+assert "ONE" in (project.parent/"AGENTS.md").read_text()
+checks+=1
 print("PASS",checks,"read-only Antigravity workspace preflight tests; no Unreal invocation")
