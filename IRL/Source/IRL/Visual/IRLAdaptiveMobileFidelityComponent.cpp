@@ -22,6 +22,7 @@ void UIRLAdaptiveMobileFidelityComponent::BeginPlay()
     }
     // Do not replace the hardware device profile on boot. Give it warmup time.
     Budget.Reset(IRLVisual::Tier::Balanced, 30.0);
+    MobileEvidence.Reset();
 #else
     SetComponentTickEnabled(false); // preserve desktop, editor and server fidelity
 #endif
@@ -32,6 +33,18 @@ void UIRLAdaptiveMobileFidelityComponent::TickComponent(float DeltaTime, ELevelT
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 #if PLATFORM_ANDROID
+    // Source-reported game-frame and joystick evidence, every ~10 seconds.
+    // Android logcat can capture this marker. This is NOT a GPU timer.
+    IRLMobileEvidence::Window Window;
+    if (MobileEvidence.Observe(static_cast<double>(DeltaTime), Window))
+    {
+        UE_LOG(LogTemp, Display,
+            TEXT("IRL_MOBILE_EVIDENCE_V1 frames=%u rejected=%u duration_s=%.3f mean_ms=%.3f p50_ms=%.3f p95_ms=%.3f p99_ms=%.3f max_ms=%.3f move_axes=%u look_axes=%u jumps=%u experiences=%u tier=%d"),
+            Window.Frames, Window.Rejected, Window.DurationSeconds, Window.MeanMs,
+            Window.P50Ms, Window.P95Ms, Window.P99Ms, Window.MaxMs,
+            Window.MoveAxes, Window.LookAxes, Window.Jumps, Window.Experiences,
+            static_cast<int32>(Budget.CurrentTier()));
+    }
     if (!bAdaptiveQualityEnabled) { return; }
     IRLVisual::Decision Decision;
     if (Budget.Observe(static_cast<double>(DeltaTime), Decision) && Decision.Changed)
@@ -70,5 +83,19 @@ void UIRLAdaptiveMobileFidelityComponent::ApplyTier(IRLVisual::Tier Tier)
     }
 #else
     (void)Tier;
+#endif
+}
+
+void UIRLAdaptiveMobileFidelityComponent::RecordMobileInput(
+    IRLMobileEvidence::InputKind Kind)
+{
+#if PLATFORM_ANDROID
+    const APlayerController* Controller = Cast<APlayerController>(GetOwner());
+    if (Controller && Controller->IsLocalController())
+    {
+        MobileEvidence.MarkInput(Kind);
+    }
+#else
+    (void)Kind;
 #endif
 }
