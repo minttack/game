@@ -36,3 +36,12 @@ References:
 - Epic UE 5.8 profiling mobile: https://dev.epicgames.com/documentation/unreal-engine/profile-android-projects-with-platformnative-tools
 
 **Disposition:** actual source configuration optimized and hardened; engine rendering, performance and APK still gated by real hardware evidence. 
+
+
+## Exact CI readback / source validation
+- GitHub Actions run **39875334488**, https://github.com/minttack/game/actions/runs/39875334488, completed **SUCCESS** on commit \`a0e261ec128b8c6488091a6e5fa03b195f737d09\`.
+- **17/17** Android source rendering, file-server safety and regression scenarios PASS. 
+- **12/12** Android mock \`BuildCookRun\` tests PASS, including no-cook rejection for invalid Android renderer and re-enabled Android File Server.
+- Inherited phone control/source contracts, synthetic ADB launch tests, portable C++ joystick (13/13 standard and 13/13 UBSan), forest evidence and original PBR generator checks PASS.
+- These tests did **not** run Unreal 5.8 or observe an actual GPU. GitHub did not build an APK or test a Moto G. Results prove only that source configuration and preflight enforcement satisfy the specified policy.
+- The desktop source renderer stayed unchanged in committed source; actual cooked Android config precedence and visual quality require **in-engine verification**, and the previously exposed Android file-server token must never be reused.
