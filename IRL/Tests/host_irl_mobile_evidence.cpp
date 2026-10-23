@@ -27,12 +27,12 @@ int main()
         if(i==13) R.MarkInput(InputKind::ExperiencePress);
         assert(!R.Observe(1.0/30.0,W));
     }
-    for(int i=0;i<12;++i)
+    for(int i=0;i<9;++i)
         assert(!R.Observe(0.10,W));
-    // Ten seconds have elapsed: 9+1.2 seconds, p99 is high.
-    assert(R.Observe(1.0/30.0,W)); ++checks;
+    // 9.9s elapsed: 9s at 30fps, then nine 100ms slow frames.
+    assert(R.Observe(0.10,W)); ++checks;
     assert(W.MoveAxes==270 && W.LookAxes==135 && W.Jumps==1 && W.Experiences==1); ++checks;
-    assert(W.Frames==283 && W.P95Ms<40 && W.P99Ms>=99.9); ++checks;
+    assert(W.Frames==280 && W.P95Ms<40 && W.P99Ms>=99.9); ++checks;
     assert(W.MaxMs>=100 && W.MeanMs>33.33); ++checks;
     R.Reset();
     for(int i=0;i<5;++i)
