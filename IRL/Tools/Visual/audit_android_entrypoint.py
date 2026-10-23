@@ -90,8 +90,8 @@ def probe_editor(unreal, project_root):
         "character":isinstance(character,unreal.IRLCharacter),
         # Both native IRLCharacter and IRLPlayerController are ABSTRACT:
         # only a non-abstract Blueprint-derived playable character is valid.
-        "has_blueprint_character":"/Game/" in normalize_class_path(pawn_class.get_path_name())
-                                  and not pawn_class.get_class_flags() & unreal.ClassFlags.ABSTRACT,
+        "has_blueprint_character":normalize_class_path(pawn_class.get_path_name()).startswith(
+            "/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter."),
     }
     assessment=assess_classes(configured,global_path,override_path,hierarchy)
     return {
