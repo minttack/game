@@ -37,5 +37,7 @@ public:
 private:
     IRLVisual::BudgetController Budget;
     IRLMobileEvidence::Recorder MobileEvidence;
+    FString MobileEvidenceSessionId;
+    uint32 MobileEvidenceWindowIndex = 0;
     void ApplyTier(IRLVisual::Tier Tier);
 };
