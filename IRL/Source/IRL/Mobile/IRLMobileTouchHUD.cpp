@@ -71,7 +71,11 @@ void UIRLMobileTouchHUD::OnJumpPressed()
     APlayerController* Player=GetOwningPlayer();
     if (Player && Player->IsLocalController())
         if (AIRLCharacter* Pawn=Cast<AIRLCharacter>(Player->GetPawn()))
+        {
             Pawn->DoJumpStart();
+            if (AIRLPlayerController* MobileController = Cast<AIRLPlayerController>(Player))
+                MobileController->RecordMobileInput(IRLMobileEvidence::InputKind::JumpPress);
+        }
 }
 
 void UIRLMobileTouchHUD::OnJumpReleased()
@@ -86,5 +90,8 @@ void UIRLMobileTouchHUD::OnExperiencePressed()
 {
     AIRLPlayerController* Player=Cast<AIRLPlayerController>(GetOwningPlayer());
     if (Player && Player->IsLocalController())
+    {
+        Player->RecordMobileInput(IRLMobileEvidence::InputKind::ExperiencePress);
         Player->AdvanceIRLExperience();
+    }
 }
