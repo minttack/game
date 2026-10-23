@@ -1,4 +1,4 @@
-"""Unreal Editor-only post-build verification for the IRL forest validation map.
+""""Unreal Editor-only post-build verification for the IRL forest validation map.
 
 Run after build_irl_forest_validation_level.py and inspect the emitted JSON.
 This is a real-editor check, not a substitute for compiling or playing the map.
@@ -16,9 +16,28 @@ EXPECTED_LABELS = {
 ASSET_PREFIX = "/Game/IRL/Visual/ProceduralStarter/"
 
 
+def _validated_instance_count(actor, label, errors):
+    """Read a genuine integer count and fail closed on missing/invalid evidence."""
+    try:
+        count = actor.last_generated_instance_count()
+    except Exception as exc:
+        errors.append(f"{label}: could not read generated instance count: {exc}")
+        return None
+    # Unreal's reflected int32 should arrive as a Python int. None, bool, strings,
+    # and other unexpected values must never silently produce a PASS report.
+    if type(count) is not int:
+        errors.append(f"{label}: invalid generated instance count: {count!r}")
+        return count
+    if count <= 0:
+        errors.append(f"{label}: no decorative instances generated")
+    return count
+
+
 def verify():
     editor = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
     world = editor.get_editor_world()
+    if world is None:
+        raise RuntimeError("No Unreal Editor world is currently loaded")
     world_path = world.get_path_name()
     if not world_path.startswith(EXPECTED_MAP_PREFIX):
         raise RuntimeError(
@@ -68,15 +87,9 @@ def verify():
         found = by_label.get(label, [])
         if len(found) != 1:
             continue
-        actor = found[0]
-        try:
-            count = actor.last_generated_instance_count()
-        except Exception as exc:
-            count = None
-            errors.append(f"{label}: could not read generated instance count: {exc}")
-        checks["biome_instances"][label] = count
-        if count is not None and count <= 0:
-            errors.append(f"{label}: no decorative instances generated")
+        checks["biome_instances"][label] = _validated_instance_count(
+            found[0], label, errors
+        )
 
     checks["status"] = "PASS" if not errors else "FAIL"
     checks["errors"] = errors
