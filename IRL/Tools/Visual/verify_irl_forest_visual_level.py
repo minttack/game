@@ -1,4 +1,4 @@
-""""Unreal Editor-only post-build verification for the IRL forest validation map.
+"""Unreal Editor-only post-build verification for the IRL forest validation map.
 
 Run after build_irl_forest_validation_level.py and inspect the emitted JSON.
 This is a real-editor check, not a substitute for compiling or playing the map.
