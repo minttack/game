@@ -72,6 +72,9 @@ with tempfile.TemporaryDirectory() as tmp:
 mcp=json.loads((Path(__file__).with_name("mcp_config.EXAMPLE.json")).read_text())
 assert set(mcp["mcpServers"])=={"unreal-mcp"}
 assert mcp["mcpServers"]["unreal-mcp"]["serverUrl"]=="http://127.0.0.1:[YOUR_PORT]/mcp"
-assert "ONE" in (project.parent/"AGENTS.md").read_text()
+rules=(project.parent/"AGENTS.md").read_text()
+assert "One Authoritative Game" in rules
+assert "NON-LLM" in rules
+assert "minttack/game" in rules
 checks+=1
 print("PASS",checks,"read-only Antigravity workspace preflight tests; no Unreal invocation")
