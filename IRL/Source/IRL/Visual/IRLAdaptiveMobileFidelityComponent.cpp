@@ -3,6 +3,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "Misc/Guid.h"
 #include "Visual/IRLLivingBiomeDetailActor.h"
 
 UIRLAdaptiveMobileFidelityComponent::UIRLAdaptiveMobileFidelityComponent()
@@ -23,6 +24,8 @@ void UIRLAdaptiveMobileFidelityComponent::BeginPlay()
     // Do not replace the hardware device profile on boot. Give it warmup time.
     Budget.Reset(IRLVisual::Tier::Balanced, 30.0);
     MobileEvidence.Reset();
+    MobileEvidenceSessionId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    MobileEvidenceWindowIndex = 0;
 #else
     SetComponentTickEnabled(false); // preserve desktop, editor and server fidelity
 #endif
@@ -39,7 +42,8 @@ void UIRLAdaptiveMobileFidelityComponent::TickComponent(float DeltaTime, ELevelT
     if (MobileEvidence.Observe(static_cast<double>(DeltaTime), Window))
     {
         UE_LOG(LogTemp, Display,
-            TEXT("IRL_MOBILE_EVIDENCE_V1 frames=%u rejected=%u duration_s=%.3f mean_ms=%.3f p50_ms=%.3f p95_ms=%.3f p99_ms=%.3f max_ms=%.3f move_axes=%u look_axes=%u jumps=%u experiences=%u tier=%d"),
+            TEXT("IRL_MOBILE_EVIDENCE_V1 session=%s seq=%u frames=%u rejected=%u duration_s=%.3f mean_ms=%.3f p50_ms=%.3f p95_ms=%.3f p99_ms=%.3f max_ms=%.3f move_axes=%u look_axes=%u jumps=%u experiences=%u tier=%d"),
+            *MobileEvidenceSessionId, ++MobileEvidenceWindowIndex,
             Window.Frames, Window.Rejected, Window.DurationSeconds, Window.MeanMs,
             Window.P50Ms, Window.P95Ms, Window.P99Ms, Window.MaxMs,
             Window.MoveAxes, Window.LookAxes, Window.Jumps, Window.Experiences,
