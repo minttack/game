@@ -64,6 +64,7 @@ jobs:
           python IRL/Tools/Visual/test_android_class_chain_mock.py
           python IRL/Tools/Visual/test_android_device_smoke.py
           python IRL/Tools/Visual/test_irl_mobile_evidence_report.py
+          python IRL/Tests/test_mobile_observability_contract.py
           g++ -std=c++17 -O2 -Wall -Wextra -Werror -pedantic -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick
           /tmp/irl-mobile-joystick
           g++ -std=c++17 -O1 -g -Wall -Wextra -Werror -pedantic -fsanitize=undefined -fno-sanitize-recover=all -I IRL/Source/IRL/Mobile IRL/Tests/host_irl_mobile_joystick.cpp -o /tmp/irl-mobile-joystick-ubsan
