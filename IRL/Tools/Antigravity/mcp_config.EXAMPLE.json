@@ -1,0 +1,8 @@
+{
+  "_comment": "Template only. Copy the mcpServers field into Antigravity's own mcp_config.json; replace [YOUR_PORT] with the port shown by the Unreal Editor MCP settings. Do NOT check machine-specific config into Git.",
+  "mcpServers": {
+    "unreal-mcp": {
+      "serverUrl": "http://127.0.0.1:[YOUR_PORT]/mcp"
+    }
+  }
+}
