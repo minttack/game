@@ -7,6 +7,8 @@ on:
       - 'workers/irl-forest-runtime-evidence-20261022'
   pull_request:
     paths:
+      - 'AGENTS.md'
+      - 'IRL/Tools/Antigravity/**'
       - 'IRL/Tools/Visual/**'
       - 'IRL/Source/IRL/Mobile/**'
       - 'IRL/Tests/test_android_mobile_contract.py'
@@ -54,6 +56,8 @@ jobs:
           python IRL/Tools/Visual/test_forest_pie_evidence.py
           python IRL/Tools/Visual/test_forest_screenshot_evidence.py
           python IRL/Tools/Visual/test_native_forest_runner.py
+          python -m compileall -q IRL/Tools/Antigravity
+          python IRL/Tools/Antigravity/test_antigravity_preflight.py
           python IRL/Tools/Visual/test_android_renderer_gate.py
           python IRL/Tools/Visual/test_android_apk_runner.py
           python IRL/Tests/test_android_mobile_contract.py
