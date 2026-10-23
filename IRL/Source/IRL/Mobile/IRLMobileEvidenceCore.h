@@ -51,7 +51,7 @@ public:
         // 10s steady-state window, or earlier only if array capacity reached.
         Samples[Used++] = FrameSeconds * 1000.0;
         Elapsed += FrameSeconds;
-        if (Elapsed < 10.0 && Used < Capacity) return false;
+        if (Elapsed + 1e-7 < 10.0 && Used < Capacity) return false;
         if (Used < 60)
         {
             Reset(); // never call a tiny interval a 10-second performance sample
