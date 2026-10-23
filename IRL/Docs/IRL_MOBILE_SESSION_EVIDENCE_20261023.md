@@ -31,3 +31,12 @@ IRL previously adapted the local graphics tier using **mean frame delta** and lo
 - Values parsed from a file, even if they use the correct marker, **are not cryptographically authenticated**. ADB capture is source-context evidence, not independent engine instrumentation.
 - An adaptive graphics tier can fluctuate with CPU-limited performance; changed graphics level is not a demonstrated visual-quality or GPU speed gain.
 - APK build and actual Moto G performance remain unverified until reported from physical tooling. No fictional data or screenshots may be presented as actual.
+
+
+## Verified source test record — GitHub Actions
+- https://github.com/minttack/game/actions/runs/39908225279 passed on commit \`f6e1e5fb24fb6a6db1bbe45af53c6bb2b1e5f1d2\`.
+- **14/14** C++17 bounded frame recorder assertions PASS under g++, and **14/14** also PASS with UndefinedBehaviorSanitizer. These are real executed C++ host tests.
+- **20/20** synthetic Android log parser tests PASS (including malformed, missing, duplicate, crossed session evidence, and unwanted unrelated log removal).
+- **12/12** native runtime integration source checks PASS (actual project component/controller/button code paths, no additional network API).
+- Inherited original mobile/rendering/build/Joystick/forest/PBR source checks PASS.
+- No UE5.8 executable, Moto G, real Android APK, physical joystick, GPU timer, FPS benchmark or thermals were involved in these CI results. Do NOT promote this to a measured device achievement.
