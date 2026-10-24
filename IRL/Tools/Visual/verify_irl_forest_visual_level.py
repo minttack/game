@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 import unreal
 
-EXPECTED_MAP_PREFIX = "/Game/IRL/Maps/Lvl_IRL_Forest_VisualValidation."
+EXPECTED_MAP = ("/Game/IRL/Maps/Lvl_IRL_Forest_VisualValidation."
+                "Lvl_IRL_Forest_VisualValidation")
 EXPECTED_LABELS = {
     "IRL_OriginalForestTerrain": 1,
     **{f"IRL_Granite_{i:02d}": 1 for i in range(14)},
@@ -71,7 +72,7 @@ def verify():
     if world is None:
         raise RuntimeError("No Unreal Editor world is currently loaded")
     world_path = world.get_path_name()
-    if not world_path.startswith(EXPECTED_MAP_PREFIX):
+    if world_path != EXPECTED_MAP:
         raise RuntimeError(
             f"Wrong map loaded: {world_path}. Open the new IRL visual-validation map first."
         )
