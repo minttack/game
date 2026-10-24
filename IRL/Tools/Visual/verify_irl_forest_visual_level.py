@@ -21,6 +21,33 @@ def _asset_object_path(name):
     return f"{ASSET_PREFIX}{name}.{name}"
 
 
+BIOME_ASSETS = {
+    "ground_cover_mesh": "SM_IRL_GrassClump",
+    "ground_cover_material": "M_IRL_LeafGreen",
+    "stone_mesh": "SM_IRL_GraniteBoulder",
+    "stone_material": "M_IRL_Granite",
+    "leaf_litter_mesh": "SM_IRL_GrassClump",
+    "leaf_litter_material": "M_IRL_LeafGreen",
+}
+
+
+def _verify_biome_assets(actor, label, errors):
+    """Verify all six editor assignments, not just a nonzero instance count."""
+    found = {}
+    for prop, name in BIOME_ASSETS.items():
+        try:
+            value = actor.get_editor_property(prop)
+            path = value.get_path_name() if value else None
+        except Exception as exc:
+            path = None
+            errors.append(f"{label}: could not read {prop}: {exc}")
+        found[prop] = path
+        expected = _asset_object_path(name)
+        if path != expected:
+            errors.append(f"{label}: {prop} expected {expected}, got {path}")
+    return found
+
+
 def _validated_instance_count(actor, label, errors):
     """Read a genuine integer count and fail closed on missing/invalid evidence."""
     try:
@@ -32,7 +59,7 @@ def _validated_instance_count(actor, label, errors):
     # and other unexpected values must never silently produce a PASS report.
     if type(count) is not int:
         errors.append(f"{label}: invalid generated instance count: {count!r}")
-        return count
+        return repr(count)
     if count <= 0:
         errors.append(f"{label}: no decorative instances generated")
     return count
@@ -64,6 +91,7 @@ def verify():
         "mesh_assets": {},
         "material_assets": {},
         "biome_instances": {},
+        "biome_assets": {},
     }
     for label, count in EXPECTED_LABELS.items():
         found = by_label.get(label, [])
@@ -103,6 +131,7 @@ def verify():
         found = by_label.get(label, [])
         if len(found) != 1:
             continue
+        checks["biome_assets"][label] = _verify_biome_assets(found[0], label, errors)
         checks["biome_instances"][label] = _validated_instance_count(
             found[0], label, errors
         )
