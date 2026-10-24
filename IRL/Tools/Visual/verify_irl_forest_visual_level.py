@@ -16,6 +16,11 @@ EXPECTED_LABELS = {
 ASSET_PREFIX = "/Game/IRL/Visual/ProceduralStarter/"
 
 
+def _asset_object_path(name):
+    """UObject.get_path_name() includes the asset object after a dot."""
+    return f"{ASSET_PREFIX}{name}.{name}"
+
+
 def _validated_instance_count(actor, label, errors):
     """Read a genuine integer count and fail closed on missing/invalid evidence."""
     try:
@@ -57,6 +62,7 @@ def verify():
         "actor_count": len(actors),
         "expected_scene_labels": {},
         "mesh_assets": {},
+        "material_assets": {},
         "biome_instances": {},
     }
     for label, count in EXPECTED_LABELS.items():
@@ -78,9 +84,19 @@ def verify():
         mesh = component.get_static_mesh() if component else None
         mesh_path = mesh.get_path_name() if mesh else None
         checks["mesh_assets"][label] = mesh_path
-        expected_path = ASSET_PREFIX + mesh_name
+        expected_path = _asset_object_path(mesh_name)
         if mesh_path != expected_path:
             errors.append(f"{label}: expected mesh {expected_path}, got {mesh_path}")
+        material_name = ("M_IRL_ForestSoil" if label == "IRL_OriginalForestTerrain"
+                         else "M_IRL_Granite")
+        material = component.get_material(0) if component else None
+        material_path = material.get_path_name() if material else None
+        checks["material_assets"][label] = material_path
+        expected_material = _asset_object_path(material_name)
+        if material_path != expected_material:
+            errors.append(
+                f"{label}: expected material {expected_material}, got {material_path}"
+            )
 
     for index in range(4):
         label = f"IRL_Biome_{index:02d}"
