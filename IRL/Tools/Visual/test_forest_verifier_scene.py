@@ -182,6 +182,13 @@ class ForestSceneContractTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Wrong map loaded"):
             verifier.verify()
 
+    def test_same_package_with_wrong_world_object_is_rejected(self):
+        self.world.path = (
+            "/Game/IRL/Maps/Lvl_IRL_Forest_VisualValidation.UnexpectedWorld"
+        )
+        with self.assertRaisesRegex(RuntimeError, "Wrong map loaded"):
+            verifier.verify()
+
     def test_missing_world_is_rejected(self):
         self.world = None
         with self.assertRaisesRegex(RuntimeError, "No Unreal Editor world"):
