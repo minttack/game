@@ -45,6 +45,12 @@ class ForestVerifierEvidenceTests(unittest.TestCase):
         VERIFIER._validated_instance_count(Actor(True), "biome", errors)
         self.assertTrue(any("invalid generated instance count" in item for item in errors))
 
+    def test_unknown_count_type_is_serializable_and_rejected(self):
+        errors = []
+        result = VERIFIER._validated_instance_count(Actor(object()), "biome", errors)
+        self.assertIsInstance(result, str)
+        self.assertTrue(any("invalid generated instance count" in item for item in errors))
+
     def test_editor_api_exception_fails_closed(self):
         errors = []
         VERIFIER._validated_instance_count(
