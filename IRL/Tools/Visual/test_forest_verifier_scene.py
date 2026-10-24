@@ -43,6 +43,13 @@ class Actor:
         self.label = label
         self.component = Component(mesh, material) if mesh else None
         self.count = count
+        self.props = {
+            name: Asset(asset_name)
+            for name, asset_name in verifier.BIOME_ASSETS.items()
+        } if count is not None else {}
+
+    def get_editor_property(self, name):
+        return self.props[name]
 
     def get_actor_label(self):
         return self.label
@@ -126,6 +133,7 @@ class ForestSceneContractTests(unittest.TestCase):
         self.assertEqual(len(report["mesh_assets"]), 15)
         self.assertEqual(len(report["material_assets"]), 15)
         self.assertEqual(len(report["biome_instances"]), 4)
+        self.assertEqual(len(report["biome_assets"]), 4)
 
     def test_missing_biome_fails(self):
         self.actors.pop()
@@ -148,6 +156,18 @@ class ForestSceneContractTests(unittest.TestCase):
     def test_wrong_material_fails(self):
         self.actors[1].component.material = Asset("M_IRL_LeafGreen")
         with self.assertRaisesRegex(RuntimeError, "expected material"):
+            verifier.verify()
+        self.assertEqual(self.report()["status"], "FAIL")
+
+    def test_wrong_biome_asset_fails(self):
+        self.actors[-1].props["ground_cover_mesh"] = Asset("SM_IRL_GraniteBoulder")
+        with self.assertRaisesRegex(RuntimeError, "ground_cover_mesh expected"):
+            verifier.verify()
+        self.assertEqual(self.report()["status"], "FAIL")
+
+    def test_missing_biome_asset_fails(self):
+        self.actors[-1].props["stone_material"] = None
+        with self.assertRaisesRegex(RuntimeError, "stone_material expected"):
             verifier.verify()
         self.assertEqual(self.report()["status"], "FAIL")
 
